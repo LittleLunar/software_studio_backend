@@ -17,7 +17,7 @@ public class MongoDBService
   )
   {
     var mongoClient = new MongoClient(
-      testDatabaseSettings.Value.ConnectingString
+      testDatabaseSettings.Value.ConnectionString
     );
 
     var mongoDatabase = mongoClient.GetDatabase(
@@ -37,9 +37,10 @@ public class MongoDBService
     );
   }
 
-  public IMongoCollection<User> GetUserCollection { get; } = null!;
+  public IMongoCollection<User> UserCollection { get { return _userCollection; } }
 
-  public IMongoCollection<Content> GetContentCollection { get; } = null!;
+  public IMongoCollection<Content> ContentCollection { get { return _contentCollection; } }
 
-  public IMongoCollection<Comment> GetCommentCollection { get; } = null!;
+  public IMongoCollection<Comment> CommentCollection { get { return _commentCollection; } }
+
 }

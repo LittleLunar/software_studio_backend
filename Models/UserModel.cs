@@ -8,32 +8,32 @@ public class User
 {
   [BsonId]
   [BsonRepresentation(BsonType.ObjectId)]
-  public string Id { get; set; }
-  
+  public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+
   [BsonElement("username")]
-  public string Username { get; set; }
+  public string? Username { get; set; }
 
   [BsonElement("password")]
-  public string Password { get; set; }
+  public string? Password { get; set; }
 
   [BsonElement("name")]
   [JsonPropertyName("name")]
-  public string Name { get; set; }
+  public string? Name { get; set; }
 
   [BsonElement("role")]
   [JsonPropertyName("role")]
-  public string Role { get; set; }
+  public string? Role { get; set; }
 
   [BsonElement("profile_image")]
   [JsonPropertyName("profile_image")]
-  public string ProfileImage { get; set; }
+  public string? ProfileImage { get; set; }
 
   [BsonElement("active")]
-  public bool Active { get; set; }
+  public bool Active { get; set; } = true;
 
   [BsonElement("banned")]
-  public bool Banned { get; set; }
+  public bool Banned { get; set; } = false;
 
   [BsonElement("created_date")]
-  public bool Created_date { get; set; }
+  public DateTime Created_date { get; set; } = DateTime.UtcNow;
 }

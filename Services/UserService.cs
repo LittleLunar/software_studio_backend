@@ -10,7 +10,7 @@ public class UserService
 
   public UserService(MongoDBService mongoDBService)
   {
-    _userCollection = mongoDBService.GetUserCollection;
+    _userCollection = mongoDBService.UserCollection;
   }
 
   public async Task<List<User>> GetAsync() => await _userCollection.Find(_ => true).ToListAsync();

@@ -15,7 +15,6 @@ builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<ContentService>();
 builder.Services.AddSingleton<CommentService>();
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -9,7 +9,7 @@ public class CommentService
 
   public CommentService(MongoDBService mongoDBService)
   {
-    _commentCollection = mongoDBService.GetCommentCollection;
+    _commentCollection = mongoDBService.CommentCollection;
   }
 
   public async Task<List<Comment>> GetAsync() => await _commentCollection.Find(_ => true).ToListAsync();

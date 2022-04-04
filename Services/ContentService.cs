@@ -9,7 +9,7 @@ public class ContentService
 
   public ContentService(MongoDBService mongoDBService)
   {
-    _contentCollection = mongoDBService.GetContentCollection;
+    _contentCollection = mongoDBService.ContentCollection;
   }
 
   public async Task<List<Content>> GetAsync() => await _contentCollection.Find(_ => true).ToListAsync();
