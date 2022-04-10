@@ -14,8 +14,6 @@ public class Content
 
   public ulong Like { get; set; } = 0;
 
-  public ulong Dislike { get; set; } = 0;
-
   [BsonElement("user_id")]
   public ObjectId? UserId { get; set; }
 

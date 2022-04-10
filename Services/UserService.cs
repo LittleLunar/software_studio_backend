@@ -15,6 +15,7 @@ public class UserService
 
   public async Task<List<User>> GetAsync() => await _userCollection.Find(_ => true).ToListAsync();
 
+  public async Task<User?> GetByUsernameAsync(string username) => await _userCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
   public async Task<User?> GetAsync(string id) => await _userCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
   public async Task CreateAsync(User newUser) => await _userCollection.InsertOneAsync(newUser);

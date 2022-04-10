@@ -1,3 +1,4 @@
+using software_studio_backend.Shared;
 using software_studio_backend.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -19,6 +20,8 @@ public class MongoDBService
     var mongoClient = new MongoClient(
       testDatabaseSettings.Value.ConnectionString
     );
+
+    Console.WriteLine("Connected To MongoDB");
 
     var mongoDatabase = mongoClient.GetDatabase(
       testDatabaseSettings.Value.DatabaseName

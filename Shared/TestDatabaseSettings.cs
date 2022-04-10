@@ -1,4 +1,4 @@
-namespace software_studio_backend.Models;
+namespace software_studio_backend.Shared;
 
 public class TestDatabaseSettings
 {

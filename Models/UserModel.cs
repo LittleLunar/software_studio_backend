@@ -11,18 +11,18 @@ public class User
   public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
   [BsonElement("username")]
-  public string? Username { get; set; }
+  public string Username { get; set; } = null!;
 
   [BsonElement("password")]
-  public string? Password { get; set; }
+  public string Password { get; set; } = null!;
 
   [BsonElement("name")]
   [JsonPropertyName("name")]
-  public string? Name { get; set; }
+  public string Name { get; set; } = null!;
 
   [BsonElement("role")]
   [JsonPropertyName("role")]
-  public string? Role { get; set; }
+  public string Role { get; set; } = null!;
 
   [BsonElement("profile_image")]
   [JsonPropertyName("profile_image")]
@@ -36,4 +36,9 @@ public class User
 
   [BsonElement("created_date")]
   public DateTime Created_date { get; set; } = DateTime.UtcNow;
+
+  public override string ToString()
+  {
+    return Username;
+  }
 }
