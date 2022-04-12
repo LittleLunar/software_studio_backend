@@ -37,8 +37,17 @@ public class SessionController : ControllerBase
     string accessToken = TokenUtils.GenerateAccessToken(user);
     string refreshToken = TokenUtils.GenerateRefreshToken(user);
 
-    setTokenCookie(Constant.Name.AccessToken, accessToken, DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec));
-    setTokenCookie(Constant.Name.RefreshToken, refreshToken, DateTime.Now.AddMonths(Constant.Number.RefreshTokenExpiresInMonths));
+    Response.Cookies.Append(Constant.Name.AccessToken, accessToken, new CookieOptions
+    {
+      HttpOnly = false,
+      Expires = DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec)
+    });
+
+    Response.Cookies.Append(Constant.Name.RefreshToken, refreshToken, new CookieOptions
+    {
+      HttpOnly = true,
+      Expires = DateTime.Now.AddMonths(Constant.Number.RefreshTokenExpiresInMonths)
+    });
 
     return Ok(new { accessToken = accessToken, refreshToken = refreshToken });
   }
@@ -70,7 +79,7 @@ public class SessionController : ControllerBase
   [Route("user")]
   public IActionResult GetSession()
   {
-    // Console.WriteLine(HttpContext.User.FindFirstValue(ClaimTypes.Role));
+    Console.WriteLine("Authen User success.");
     return Ok("You are normal authorized user.");
   }
 
@@ -79,7 +88,8 @@ public class SessionController : ControllerBase
   [Route("admin")]
   public IActionResult GetAdminSession()
   {
-    return Ok("You are an admin.");
+    Console.WriteLine("Authen admin success.");
+    return Ok(new { message = "You are an admin." });
   }
 
   [Authorize]
@@ -90,16 +100,9 @@ public class SessionController : ControllerBase
     Console.WriteLine("Someone logging out.");
 
     Response.Cookies.Delete(Constant.Name.AccessToken);
+    Response.Cookies.Delete(Constant.Name.RefreshToken);
 
     return NoContent();
   }
 
-  private void setTokenCookie(string name, string token, DateTime expires)
-  {
-    Response.Cookies.Append(name, token, new CookieOptions
-    {
-      HttpOnly = true,
-      Expires = expires
-    });
-  }
 }

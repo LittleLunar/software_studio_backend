@@ -23,8 +23,11 @@ public class RevokeToken
 
   public async Task InvokeAsync(HttpContext context)
   {
+    // Check Token in request header Authorization section.
     string accessToken = context.Request.Headers.Authorization.ToString().Split(' ').Last();
 
+    // Debugging if client have no accessToken
+    if (accessToken.Length <= 10) accessToken = String.Empty;
 
     if (!String.IsNullOrEmpty(accessToken)) { await _next(context); return; }
 
@@ -33,6 +36,8 @@ public class RevokeToken
     if (isValid) { await _next(context); return; }
 
     string? refreshToken = context.Request.Cookies[Constant.Name.RefreshToken];
+
+    Console.WriteLine("RefreshToken : {0}", refreshToken);
 
     if (String.IsNullOrEmpty(refreshToken)) { await _next(context); return; }
 
@@ -48,7 +53,7 @@ public class RevokeToken
 
     context.Response.Cookies.Append(Constant.Name.AccessToken, newAccessToken, new CookieOptions
     {
-      HttpOnly = true,
+      HttpOnly = false,
       Expires = DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec)
     });
 
