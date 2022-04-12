@@ -7,12 +7,11 @@ namespace software_studio_backend.Services;
 
 public class MongoDBService
 {
-  private readonly IMongoCollection<User> _userCollection;
+  public IMongoCollection<User> UserCollection { get; private set; }
 
-  private readonly IMongoCollection<Content> _contentCollection;
+  public IMongoCollection<Content> ContentCollection { get; private set; }
 
-  private readonly IMongoCollection<Comment> _commentCollection;
-
+  public IMongoCollection<Comment> CommentCollection { get; private set; }
   public MongoDBService(
     IOptions<TestDatabaseSettings> testDatabaseSettings
   )
@@ -27,23 +26,18 @@ public class MongoDBService
       testDatabaseSettings.Value.DatabaseName
     );
 
-    _userCollection = mongoDatabase.GetCollection<User>(
+    UserCollection = mongoDatabase.GetCollection<User>(
       testDatabaseSettings.Value.UsersCollectionName
     );
 
-    _contentCollection = mongoDatabase.GetCollection<Content>(
+    ContentCollection = mongoDatabase.GetCollection<Content>(
       testDatabaseSettings.Value.ContentsCollectionName
     );
 
-    _commentCollection = mongoDatabase.GetCollection<Comment>(
+    CommentCollection = mongoDatabase.GetCollection<Comment>(
       testDatabaseSettings.Value.CommentsCollectionName
     );
   }
 
-  public IMongoCollection<User> UserCollection { get { return _userCollection; } }
-
-  public IMongoCollection<Content> ContentCollection { get { return _contentCollection; } }
-
-  public IMongoCollection<Comment> CommentCollection { get { return _commentCollection; } }
 
 }

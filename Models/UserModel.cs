@@ -22,7 +22,7 @@ public class User
 
   [BsonElement("role")]
   [JsonPropertyName("role")]
-  public string Role { get; set; } = null!;
+  public string Role { get; set; } = "user";
 
   [BsonElement("profile_image")]
   [JsonPropertyName("profile_image")]
@@ -35,7 +35,7 @@ public class User
   public bool Banned { get; set; } = false;
 
   [BsonElement("created_date")]
-  public DateTime Created_date { get; set; } = DateTime.UtcNow;
+  public DateTime Created_date { get; set; } = DateTime.Now;
 
   public override string ToString()
   {

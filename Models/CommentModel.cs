@@ -10,19 +10,22 @@ public class Comment
   [BsonRepresentation(BsonType.ObjectId)]
   public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
+  [BsonElement("detail")]
   public string Detail { get; set; } = "";
 
-  public ulong Like { get; set; } = 0;
+  [BsonElement("like")]
+  public List<string> Like { get; set; } = new List<string>();
 
   [BsonElement("content_id")]
-  public ObjectId? ContentId { get; set; }
+  [BsonRepresentation(BsonType.ObjectId)]
+  [JsonPropertyName("content_id")]
+  public string? ContentId { get; set; }
 
   [BsonElement("user_id")]
-  public ObjectId? UserId { get; set; }
-
-  [BsonElement("comment_id")]
-  public ObjectId? CommentId { get; set; }
+  [BsonRepresentation(BsonType.ObjectId)]
+  [JsonPropertyName("user_id")]
+  public string? UserId { get; set; }
 
   [BsonElement("created_date")]
-  public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+  public DateTime CreatedDate { get; set; } = DateTime.Now;
 }

@@ -1,54 +1,71 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 using software_studio_backend.Shared;
 using software_studio_backend.Models;
-using software_studio_backend.Services;
-using System.Security.Cryptography;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace software_studio_backend.Utils;
 
-public static class TokenUtils
+public class TokenUtils
 {
+  public static TokenValidationParameters tokensValidatorParam { get; } = new TokenValidationParameters
+  {
+    ValidateIssuer = true,
+    ValidateAudience = true,
+    ValidateLifetime = true,
+    ValidateIssuerSigningKey = true,
+    ValidIssuer = Configuration.staticConfig["Jwt:Issuer"],
+    ValidAudience = Configuration.staticConfig["Jwt:Audience"],
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.staticConfig["Jwt:SecretKey"])),
+    ClockSkew = TimeSpan.Zero
+  };
+  public static JwtSecurityTokenHandler tokenHandler { get; } = new JwtSecurityTokenHandler();
   public static string GenerateAccessToken(User user)
   {
+    Claim[] claims = new Claim[] {
+      new Claim(ClaimTypes.Name, user.Username),
+      new Claim(ClaimTypes.Role, user.Role),
+      new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString())
+    };
+    return GenerateToken(DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec), claims);
 
-    string accessToken = EncryptHMAC256(payload: user.Username);
-
-    Token token = new Token { Type = Constant.Name.AccessToken, User = user, EncryptedString = accessToken, Expires = DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec) };
-
-    SessionCollection.Create(token);
-
-    return accessToken;
   }
 
   public static string GenerateRefreshToken(User user)
   {
-
-    string refreshToken = EncryptHMAC256(payload: user.Id);
-
-    Token token = new Token { Type = Constant.Name.RefreshToken, User = user, EncryptedString = refreshToken, Expires = DateTime.Now.AddMonths(Constant.Number.RefreshTokenExpiresInMonths) };
-
-    SessionCollection.Create(token);
-
-    return refreshToken;
+    Claim[] claims = new Claim[] {
+      new Claim(ClaimTypes.Name, user.Username)
+    };
+    return GenerateToken(DateTime.Now.AddMonths(Constant.Number.RefreshTokenExpiresInMonths), claims);
   }
 
-  private static string EncryptHMAC256(string payload)
+  private static string GenerateToken(DateTime expires, Claim[]? claims = null)
   {
-    if (Configuration.staticConfig == null)
-      throw new NullReferenceException("No Secret Key Provided");
+    SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.staticConfig["Jwt:SecretKey"]));
+    SigningCredentials credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-    string encrypted;
-    
-    using (var hmacsha256 = new HMACSHA256(Encoding.UTF8.GetBytes(Configuration.staticConfig["Secret:SecretKey"])))
-    {
-      var hash = hmacsha256.ComputeHash(Encoding.UTF8.GetBytes(payload + DateTime.Now.ToString()));
-      encrypted = Convert.ToBase64String(hash);
-    }
+    JwtSecurityToken token = new JwtSecurityToken(
+      Configuration.staticConfig["Jwt:Issuer"],
+      Configuration.staticConfig["Jwt:Audience"],
+      claims,
+      expires: expires,
+      signingCredentials: credentials
+    );
 
-    return encrypted;
+    return new JwtSecurityTokenHandler().WriteToken(token);
   }
 
+  public static bool ValidateToken(string token)
+  {
+    try
+    {
+      tokenHandler.ValidateToken(token, tokensValidatorParam, out SecurityToken validatedToken);
+    }
+    catch (Exception)
+    {
+      return false;
+    }
+    return true;
+  }
 }

@@ -1,9 +1,7 @@
 using software_studio_backend.Models;
 using software_studio_backend.Services;
-using software_studio_backend.Utils;
-using software_studio_backend.Shared;
 using Microsoft.AspNetCore.Mvc;
-using System.Text;
+using MongoDB.Driver;
 
 namespace software_studio_backend.Controllers;
 
@@ -11,79 +9,44 @@ namespace software_studio_backend.Controllers;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-  private readonly UserService _userService;
+  private readonly MongoDBService _mongoDB;
 
-  public UserController(UserService userService)
+  public UserController(MongoDBService mongoDBService)
   {
-    _userService = userService;
+    _mongoDB = mongoDBService;
   }
 
-  [HttpPost]
-  [Route("authenticate")]
-  public async Task<IActionResult> Authenticate([FromBody] AuthenRequest request)
-  {
-    User? user = await _userService.GetByUsernameAsync(request.username);
 
-    if (user is null) return NotFound("User is not found");
-
-    if (user.Password != request.password) return Unauthorized("Username or Password is incorrect.");
-
-    // generateAccessToken(username)
-    string accessToken = TokenUtils.GenerateAccessToken(user);
-
-    // generateRefreshToken(username)
-    string refreshToken = TokenUtils.GenerateRefreshToken(user);
-
-
-    // set tokens to Cookie
-    setTokenCookie(Constant.Name.AccessToken, accessToken, DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec));
-    setTokenCookie(Constant.Name.RefreshToken, refreshToken, DateTime.Now.AddMonths(Constant.Number.RefreshTokenExpiresInMonths));
-
-    return Ok("Authen success");
-  }
-
-  private void setTokenCookie(string name, string token, DateTime expires)
-  {
-    Response.Cookies.Append(name, token, new CookieOptions
-    {
-      HttpOnly = true,
-      Expires = expires
-    });
-  }
 
   [HttpGet]
-  public async Task<List<User>> Get() => await _userService.GetAsync();
+  public async Task<IActionResult> Get()
+  {
+    List<User> users = await _mongoDB.UserCollection.Find(_ => true).ToListAsync();
+
+    return Ok(users.OrderByDescending(x => x.Created_date).ToList());
+  }
 
   [HttpGet("{id:length(24)}")]
-  public async Task<ActionResult<User>> Get(string id)
+  public async Task<IActionResult> Get(string id)
   {
-    User? user = await _userService.GetAsync(id);
+    User? user = await _mongoDB.UserCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
     if (user is null) return NotFound();
 
-    return user;
-  }
-
-  [HttpPost]
-  public async Task<IActionResult> Post(User newUser)
-  {
-    await _userService.CreateAsync(newUser);
-
-    return CreatedAtAction(nameof(Get), new { id = newUser.Id }, newUser);
-
+    return Ok(user);
   }
 
   [HttpPut("{id:length(24)}")]
   public async Task<IActionResult> Update(string id, User updatedUser)
   {
 
-    User? user = await _userService.GetAsync(id);
+    User? user = await _mongoDB.UserCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
     if (user is null) return NotFound();
 
     updatedUser.Id = user.Id;
 
-    await _userService.UpdateAsync(id, updatedUser);
+    await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Id == id, updatedUser);
 
     return NoContent();
 
@@ -92,15 +55,20 @@ public class UserController : ControllerBase
   [HttpDelete("{id:length(24)}")]
   public async Task<IActionResult> Delete(string id)
   {
-    User? user = await _userService.GetAsync(id);
+    User? user = await _mongoDB.UserCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
     if (user is null) return NotFound();
 
-    Token? token = SessionCollection.GetSession(user.Username!);
+    await _mongoDB.UserCollection.DeleteOneAsync(x => x.Id == id);
 
-    if (token != null) SessionCollection.Invalidate(token);
+    return NoContent();
+  }
 
-    await _userService.RemoveAsync(id);
+  [HttpDelete]
+  public async Task<IActionResult> Delete()
+  {
+
+    await _mongoDB.UserCollection.DeleteManyAsync(_ => true);
 
     return NoContent();
   }
