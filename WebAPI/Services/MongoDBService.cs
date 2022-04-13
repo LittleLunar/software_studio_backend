@@ -9,33 +9,38 @@ public class MongoDBService
 {
   public IMongoCollection<User> UserCollection { get; private set; }
 
-  public IMongoCollection<Content> ContentCollection { get; private set; }
+  public IMongoCollection<Blog> BlogCollection { get; private set; }
 
+  public IMongoCollection<Announcement> AnnouncementCollection { get; private set; }
   public IMongoCollection<Comment> CommentCollection { get; private set; }
   public MongoDBService(
-    IOptions<TestDatabaseSettings> testDatabaseSettings
+    IOptions<DatabaseSettings> databaseSettings
   )
   {
     var mongoClient = new MongoClient(
-      testDatabaseSettings.Value.ConnectionString
+      databaseSettings.Value.ConnectionString
     );
 
     Console.WriteLine("Connected To MongoDB");
 
     var mongoDatabase = mongoClient.GetDatabase(
-      testDatabaseSettings.Value.DatabaseName
+      databaseSettings.Value.DatabaseName
     );
 
     UserCollection = mongoDatabase.GetCollection<User>(
-      testDatabaseSettings.Value.UsersCollectionName
+      databaseSettings.Value.UsersCollectionName
     );
 
-    ContentCollection = mongoDatabase.GetCollection<Content>(
-      testDatabaseSettings.Value.ContentsCollectionName
+    BlogCollection = mongoDatabase.GetCollection<Blog>(
+      databaseSettings.Value.BlogsCollectionName
+    );
+
+    AnnouncementCollection = mongoDatabase.GetCollection<Announcement>(
+      databaseSettings.Value.AnnouncementsCollectionName
     );
 
     CommentCollection = mongoDatabase.GetCollection<Comment>(
-      testDatabaseSettings.Value.CommentsCollectionName
+      databaseSettings.Value.CommentsCollectionName
     );
   }
 

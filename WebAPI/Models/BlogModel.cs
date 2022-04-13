@@ -4,17 +4,20 @@ using System.Text.Json.Serialization;
 
 namespace software_studio_backend.Models;
 
-public class Content
+public class Blog
 {
   [BsonId]
   [BsonRepresentation(BsonType.ObjectId)]
   public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
+  [BsonElement("topic")]
+  public string Topic { get; set; } = null!;
+
   [BsonElement("detail")]
   public string Detail { get; set; } = "";
 
   [BsonElement("tags")]
-  public List<string> Tags { get; set; } = new List<string>();
+  public List<string> Category { get; set; } = new List<string>();
 
   [BsonElement("like")]
   public List<string> Like { get; set; } = new List<string>();
@@ -26,4 +29,7 @@ public class Content
 
   [BsonElement("created_date")]
   public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+  [BsonElement("updated_date")]
+  public DateTime UpdatedDate { get; set; } = DateTime.Now;
 }

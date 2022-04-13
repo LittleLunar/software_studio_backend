@@ -1,24 +1,37 @@
+
 using System.Text.Json.Serialization;
 
 namespace software_studio_backend.Models;
 public class CommentResponse
 {
-  public string Id { get; set; } = null!;
+  [JsonPropertyName("comment_id")]
+  public string CommentId { get; set; } = null!;
 
-  public string Detail { get; set; } = "";
+  [JsonPropertyName("user_picture")]
+  public string? UserPicture { get; set; }
 
-  public List<string> Like { get; set; } = new List<string>();
+  [JsonPropertyName("user_displayname")]
+  public string Username { get; set; } = null!;
 
-  public UserResponse Owner { get; set; } = null!;
+  [JsonPropertyName("comment")]
+  public string Comment { get; set; } = null!;
 
-  [JsonPropertyName("post_date")]
-  public DateTime PostDate { get; set; }
+  [JsonPropertyName("like")]
+  public int Like { get; set; } = 0;
 
-  public CommentResponse(Comment comment)
+  [JsonPropertyName("like_users")]
+  public List<string> LikeUser { get; set; } = new List<string>();
+
+  [JsonPropertyName("created_date")]
+  public DateTime CreatedDate { get; set; }
+  public CommentResponse(Comment comment, User user)
   {
-    this.Id = comment.Id;
-    this.Detail = comment.Detail;
-    this.Like = comment.Like;
-    this.PostDate = comment.CreatedDate;
+    this.CommentId = comment.Id;
+    this.UserPicture = user.ProfileImage;
+    this.Username = user.Name;
+    this.Comment = comment.Detail;
+    this.Like = comment.Like.Count;
+    this.LikeUser = comment.Like;
+    this.CreatedDate = comment.CreatedDate;
   }
 }

@@ -1,2 +1,8 @@
-/bin
-/obj
+bin/
+obj/
+publish/
+out/
+.vscode
+.git
+.gitignore
+*.DS_Store

@@ -5,8 +5,6 @@ using software_studio_backend.Shared;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
-using System.Linq;
 
 namespace software_studio_backend.Controllers;
 

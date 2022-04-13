@@ -4,15 +4,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using software_studio_backend.Middleware;
-using software_studio_backend.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.Configure<TestDatabaseSettings>(
-    builder.Configuration.GetSection("TestDatabase")
+builder.Services.Configure<DatabaseSettings>(
+    builder.Configuration.GetSection("MongoDB")
 );
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -56,9 +55,7 @@ builder.Services.AddCors(option =>
 
 // There is no appropiate way to instantiate this class ^-^.
 Configuration myStaticConfig = new Configuration(builder.Configuration);
-// TokenUtils tokenUtil = new TokenUtils();
 builder.Services.AddSingleton<Configuration>(myStaticConfig);
-// builder.Services.AddSingleton<TokenUtils>(tokenUtil);
 builder.Services.AddSingleton<MongoDBService>();
 
 var app = builder.Build();

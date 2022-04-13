@@ -4,8 +4,10 @@ namespace software_studio_backend.Models;
 
 public class UserResponse
 {
+  [JsonPropertyName("user_id")]
   public string Id { get; set; } = null!;
 
+  [JsonPropertyName("name")]
   public string Name { get; set; } = null!;
 
   [JsonPropertyName("profile_image")]
