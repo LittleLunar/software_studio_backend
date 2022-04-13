@@ -28,9 +28,11 @@ public class SessionController : ControllerBase
 
     User? user = await _mongoDB.UserCollection.Find(x => x.Username == request.username).FirstOrDefaultAsync();
 
-    if (user == null) return NotFound();
+    if (user == null)
+      return NotFound(new ErrorMessage("User is not found."));
 
-    if (request.password != user!.Password) return Unauthorized();
+    if (request.password != user!.Password)
+      return Unauthorized(new ErrorMessage("Username or Password is incorrect."));
 
     string accessToken = TokenUtils.GenerateAccessToken(user);
     string refreshToken = TokenUtils.GenerateRefreshToken(user);
