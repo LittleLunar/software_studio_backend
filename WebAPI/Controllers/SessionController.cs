@@ -59,11 +59,13 @@ public class SessionController : ControllerBase
   {
     Console.WriteLine("Someone is registering.");
 
-    if (request.Password != request.ConfirmPassword) return Unauthorized("Passwords are not match.");
-
     User? oldUser = await _mongoDB.UserCollection.Find(x => x.Username == request.Username).FirstOrDefaultAsync();
 
-    if (oldUser != null) return Unauthorized("Username is taken.");
+    if (oldUser != null)
+      return Unauthorized(new ErrorMessage("This username has been taken."));
+
+    if (request.Password != request.ConfirmPassword)
+      return Unauthorized(new ErrorMessage("Passwords are not match."));
 
     User newUser = new User { Username = request.Username, Password = request.Password };
 

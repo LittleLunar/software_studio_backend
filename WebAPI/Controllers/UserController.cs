@@ -17,10 +17,22 @@ public class UserController : ControllerBase
     _mongoDB = mongoDBService;
   }
 
+  [Authorize(Roles = "admin")]
+  [HttpGet]
+  [Route("list")]
+  public async Task<IActionResult> GetUserList([FromQuery] string filter, [FromQuery] string orderby)
+  {
+    List<User> users = await _mongoDB.UserCollection.Find(_ => true).ToListAsync();
+    Console.WriteLine("filter : {0}, orderby : {1}", filter, orderby);
+
+
+    return Ok();
+  }
+
   [Authorize]
   [HttpGet]
-  [Route("profile/{id:length(24)}")]
-  public async Task<IActionResult> GetUserProfile(string id)
+  [Route("profile")]
+  public async Task<IActionResult> GetUserProfile()
   {
     string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
 

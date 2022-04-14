@@ -10,6 +10,9 @@ public class UserResponse
   [JsonPropertyName("name")]
   public string Name { get; set; } = null!;
 
+  [JsonPropertyName("role")]
+  public string Role { get; set; } = null!;
+
   [JsonPropertyName("profile_image")]
   public string? ProfileImage { get; set; }
 
@@ -17,6 +20,7 @@ public class UserResponse
   {
     this.Id = user.Id;
     this.Name = user.Name;
+    this.Role = user.Role;
     this.ProfileImage = user.ProfileImage;
   }
 }
