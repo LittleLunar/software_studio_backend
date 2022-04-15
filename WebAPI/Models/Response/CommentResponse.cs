@@ -24,6 +24,9 @@ public class CommentResponse
 
   [JsonPropertyName("created_date")]
   public DateTime CreatedDate { get; set; }
+
+  [JsonPropertyName("updated_date")]
+  public DateTime UpdatedDate { get; set; }
   public CommentResponse(Comment comment, User user)
   {
     this.CommentId = comment.Id;
@@ -33,5 +36,6 @@ public class CommentResponse
     this.Like = comment.Like.Count;
     this.LikeUser = comment.Like;
     this.CreatedDate = comment.CreatedDate;
+    this.UpdatedDate = comment.UpdatedDate;
   }
 }

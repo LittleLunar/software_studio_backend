@@ -8,14 +8,8 @@ public class BlogResponse
   [JsonPropertyName("blog_id")]
   public string BlogId { get; set; } = null!;
 
-  [JsonPropertyName("author_id")]
-  public string AuthorId { get; set; } = null!;
-
-  [JsonPropertyName("author_displayname")]
-  public string AuthorDisplayName { get; set; } = null!;
-
-  [JsonPropertyName("author_image")]
-  public string? AuthorPicture { get; set; }
+  [JsonPropertyName("author")]
+  public UserResponse Author { get; set; } = null!;
 
   [JsonPropertyName("topic")]
   public string Topic { get; set; } = null!;
@@ -35,21 +29,23 @@ public class BlogResponse
   [JsonPropertyName("created_date")]
   public DateTime CreatedDate { get; set; }
 
+  [JsonPropertyName("updated_date")]
+  public DateTime UpdatedDate { get; set; }
+
   [JsonPropertyName("comments")]
   public List<CommentResponse> Comments { get; set; } = new List<CommentResponse>();
 
   public BlogResponse(Blog blog, User user, List<CommentResponse>? comments = null)
   {
     this.BlogId = blog.Id;
-    this.AuthorId = user.Id;
-    this.AuthorDisplayName = user.Name;
-    this.AuthorPicture = user.ProfileImage;
+    this.Author = new UserResponse(user);
     this.Topic = blog.Topic;
     this.Content = blog.Detail;
     this.Category = blog.Category;
     this.Like = blog.Like.Count;
     this.LikeUsers = blog.Like;
     this.CreatedDate = blog.CreatedDate;
+    this.UpdatedDate = blog.UpdatedDate;
     this.Comments = comments ?? this.Comments;
   }
 }

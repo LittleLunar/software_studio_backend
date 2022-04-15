@@ -22,16 +22,18 @@ public class SessionController : ControllerBase
   [AllowAnonymous]
   [HttpPost]
   [Route("login")]
-  public async Task<IActionResult> Login([FromBody] AuthenRequest request)
+  public async Task<IActionResult> Login([FromBody] AuthenRequest body)
   {
     Console.WriteLine("Someone is logging in.");
 
-    User? user = await _mongoDB.UserCollection.Find(x => x.Username == request.username).FirstOrDefaultAsync();
+    User? user = await _mongoDB.UserCollection.Find(x => x.Username == body.username).FirstOrDefaultAsync();
 
     if (user == null)
       return NotFound(new ErrorMessage("User is not found."));
 
-    if (request.password != user!.Password)
+    bool IsPassCorrect = PasswordEncryption.ValidatePassword(body.password, user!.Password);
+
+    if (!IsPassCorrect)
       return Unauthorized(new ErrorMessage("Username or Password is incorrect."));
 
     string accessToken = TokenUtils.GenerateAccessToken(user);
@@ -55,25 +57,46 @@ public class SessionController : ControllerBase
   [AllowAnonymous]
   [HttpPost]
   [Route("register")]
-  public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+  public async Task<IActionResult> Register([FromBody] RegisterRequest body)
   {
     Console.WriteLine("Someone is registering.");
 
-    User? oldUser = await _mongoDB.UserCollection.Find(x => x.Username == request.Username).FirstOrDefaultAsync();
+    User? oldUser = await _mongoDB.UserCollection.Find(x => x.Username == body.Username).FirstOrDefaultAsync();
 
     if (oldUser != null)
       return Unauthorized(new ErrorMessage("This username has been taken."));
 
-    if (request.Password != request.ConfirmPassword)
+    if (body.Password != body.ConfirmPassword)
       return Unauthorized(new ErrorMessage("Passwords are not match."));
 
-    User newUser = new User { Username = request.Username, Password = request.Password };
+    string encryptedPass = PasswordEncryption.Encrypt(body.Password);
+
+    User newUser = new User { Username = body.Username, Password = encryptedPass };
 
     await _mongoDB.UserCollection.InsertOneAsync(newUser);
 
-    List<User> users = await _mongoDB.UserCollection.Find(_ => true).ToListAsync();
+    return CreatedAtAction(nameof(Register), newUser);
+  }
 
-    return Ok(users.OrderByDescending(x => x.Created_date).ToList());
+  [AllowAnonymous]
+  [HttpPost]
+  [Route("admin/admin/admin/brabrabra")]
+  public async Task<IActionResult> RegisterAdmin([FromBody] RegisterAdminRequest body)
+  {
+    Console.WriteLine("Someone is registering.");
+
+    User? oldUser = await _mongoDB.UserCollection.Find(x => x.Username == body.Username).FirstOrDefaultAsync();
+
+    if (oldUser != null)
+      return Unauthorized(new ErrorMessage("This username has been taken."));
+
+    string encryptedPass = PasswordEncryption.Encrypt(body.Password);
+
+    User newUser = new User { Username = body.Username, Password = encryptedPass, Role = "admin" };
+
+    await _mongoDB.UserCollection.InsertOneAsync(newUser);
+
+    return Ok(newUser);
   }
 
   [Authorize]

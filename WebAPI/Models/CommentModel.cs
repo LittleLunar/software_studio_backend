@@ -28,4 +28,7 @@ public class Comment
 
   [BsonElement("created_date")]
   public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+  [BsonElement("updated_date")]
+  public DateTime UpdatedDate { get; set; } = DateTime.Now;
 }
