@@ -17,6 +17,12 @@ public class PantipResponse
   [JsonPropertyName("content")]
   public string Content { get; set; } = null!;
 
+  [JsonPropertyName("like")]
+  public int Like { get; set; }
+
+  [JsonPropertyName("like_users")]
+  public List<string> LikeUsers { get; set; } = null!;
+
   [JsonPropertyName("created_date")]
   public DateTime CreatedDate { get; set; }
 
@@ -31,6 +37,8 @@ public class PantipResponse
     this.Author = new UserResponse(user);
     this.Topic = pantip.Topic;
     this.Content = pantip.Detail;
+    this.Like = pantip.Like.Count;
+    this.LikeUsers = pantip.Like;
     this.CreatedDate = pantip.CreatedDate;
     this.UpdatedDate = pantip.UpdatedDate;
     this.Comments = comments ?? this.Comments;

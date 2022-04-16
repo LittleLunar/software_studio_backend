@@ -27,14 +27,14 @@ public class PantipController : ControllerBase
 
     List<PantipResponse> pantipResponses = new List<PantipResponse>();
 
-    foreach (Pantip pantip in pantips.OrderByDescending(x => x.CreatedDate))
+    foreach (Pantip pantip in pantips)
     {
       User author = await _mongoDB.UserCollection.Find(x => x.Id == pantip.UserId).FirstAsync();
       PantipResponse pantipResponse = new PantipResponse(pantip, author);
       pantipResponses.Add(pantipResponse);
     }
 
-    PantipListResponse pantipList = new PantipListResponse { Pantips = pantipResponses };
+    PantipListResponse pantipList = new PantipListResponse { Pantips = pantipResponses.OrderByDescending(x => x.CreatedDate).ToList() };
 
     return Ok(pantipList);
   }
@@ -55,14 +55,15 @@ public class PantipController : ControllerBase
     if (author == null)
       return NotFound(new ErrorMessage("Author is not found"));
 
-    List<CommentResponse> comments = new List<CommentResponse>();
-
     List<Comment> commentsInPantip = await _mongoDB.CommentCollection.Find(x => x.ContentId == id).ToListAsync();
+
+    List<CommentResponse> comments = new List<CommentResponse>();
 
     foreach (Comment comment in commentsInPantip)
     {
       User authorComment = await _mongoDB.UserCollection.Find(x => x.Id == comment.UserId).FirstAsync();
-      comments.Add(new CommentResponse(comment, authorComment));
+      CommentResponse commentResponse = new CommentResponse(comment, authorComment);
+      comments.Add(commentResponse);
     }
 
     PantipResponse pantipResponse = new PantipResponse(pantip, author, comments);
@@ -71,7 +72,7 @@ public class PantipController : ControllerBase
 
   }
 
-  [Authorize(Roles = "admin")]
+  [Authorize]
   [HttpPost]
   [Route("create")]
   public async Task<IActionResult> CreatePantip([FromBody] CreatePantipRequest body)
@@ -91,12 +92,15 @@ public class PantipController : ControllerBase
 
   }
 
-  [Authorize(Roles = "admin")]
+  [Authorize]
   [HttpPatch]
   [Route("update/{id:length(24)}")]
   public async Task<IActionResult> UpdatePantip(string id, [FromBody] EditContentRequest body)
   {
-    string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+
+    if (String.IsNullOrEmpty(username))
+      return Unauthorized(new ErrorMessage("You are not authorized user."));
 
     User? user = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
 
@@ -119,7 +123,33 @@ public class PantipController : ControllerBase
     return Ok(pantip);
   }
 
-  [Authorize(Roles = "admin")]
+  [Authorize]
+  [HttpPatch]
+  [Route("like/{id:length(24)}")]
+  public async Task<IActionResult> LikePantip(string id)
+  {
+    Pantip? pantip = await _mongoDB.PantipCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+
+    if (pantip == null)
+      return NotFound(new ErrorMessage("Pantip is not found."));
+
+    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+
+    if (String.IsNullOrEmpty(username))
+      return Unauthorized(new ErrorMessage("You are not authorized user."));
+
+    if (pantip.Like.Contains(username))
+      pantip.Like.Remove(username);
+    else
+      pantip.Like.Add(username);
+
+    await _mongoDB.PantipCollection.ReplaceOneAsync(x => x.Id == id, pantip);
+
+    return Ok(pantip);
+
+  }
+
+  [Authorize]
   [HttpDelete]
   [Route("delete/{id:length(24)}")]
   public async Task<IActionResult> DeletePantip(string id)

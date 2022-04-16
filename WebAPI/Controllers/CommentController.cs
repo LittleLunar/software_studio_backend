@@ -21,11 +21,35 @@ public class CommentController : ControllerBase
   }
 
   [Authorize]
+  [HttpGet]
+  [Route("list")]
+  public async Task<IActionResult> GetComments()
+  {
+    List<Comment> comments = await _mongoDB.CommentCollection.Find(_ => true).ToListAsync();
+
+    List<CommentResponse> commentResponses = new List<CommentResponse>();
+
+    foreach (Comment comment in comments)
+    {
+      User user = await _mongoDB.UserCollection.Find(x => x.Id == comment.UserId).FirstAsync();
+      CommentResponse commentResponse = new CommentResponse(comment, user);
+      commentResponses.Add(commentResponse);
+    }
+
+    CommentListResponse commentList = new CommentListResponse { Comments = commentResponses.OrderByDescending(x => x.CreatedDate).ToList() };
+
+    return Ok(commentList);
+  }
+
+  [Authorize]
   [HttpPost]
   [Route("create")]
   public async Task<IActionResult> CreateComment([FromBody] CreateCommentRequest body)
   {
-    string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+
+    if (String.IsNullOrEmpty(username))
+      return Unauthorized(new ErrorMessage("You are not authorized user."));
 
     User? author = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
 
@@ -33,6 +57,8 @@ public class CommentController : ControllerBase
       return NotFound(new ErrorMessage("User is not found."));
 
     Comment newComment = new Comment { Detail = body.Content, ContentId = body.ContentId, UserId = author.Id };
+
+    await _mongoDB.CommentCollection.InsertOneAsync(newComment);
 
     return CreatedAtAction(nameof(CreateComment), newComment);
   }
@@ -42,25 +68,30 @@ public class CommentController : ControllerBase
   [Route("update/{id:length(24)}")]
   public async Task<IActionResult> UpdateComment(string id, [FromBody] EditContentRequest body)
   {
-    string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+
+    if (String.IsNullOrEmpty(username))
+      return Unauthorized(new ErrorMessage("You are not authorized user."));
 
     User? author = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
 
     if (author == null)
       return NotFound(new ErrorMessage("User is not found"));
 
-    Comment? comment = await _mongoDB.CommentCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+    Comment? updatedComment = await _mongoDB.CommentCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
-    if (comment == null)
+    if (updatedComment == null)
       return NotFound(new ErrorMessage("Comment is not found."));
 
-    if (author.Id != comment.UserId)
+    if (author.Id != updatedComment.UserId)
       return Unauthorized(new ErrorMessage("You are not the author of this comment."));
 
-    comment.Detail = body.Content;
-    comment.UpdatedDate = DateTime.Now;
+    updatedComment.Detail = body.Content;
+    updatedComment.UpdatedDate = DateTime.Now;
 
-    return Ok(comment);
+    await _mongoDB.CommentCollection.ReplaceOneAsync(x => x.Id == id, updatedComment);
+
+    return Ok(updatedComment);
   }
 
   [Authorize]
@@ -68,7 +99,10 @@ public class CommentController : ControllerBase
   [Route("like/{id:length(24)}")]
   public async Task<IActionResult> LikeComment(string id)
   {
-    string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+
+    if (String.IsNullOrEmpty(username))
+      return Unauthorized(new ErrorMessage("You are not authorized user."));
 
     Comment? comment = await _mongoDB.CommentCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
@@ -91,7 +125,10 @@ public class CommentController : ControllerBase
   [Route("delete/{id:length(24)}")]
   public async Task<IActionResult> DeleteComment(string id)
   {
-    string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+
+    if (String.IsNullOrEmpty(username))
+      return Unauthorized(new ErrorMessage("You are not authorized user."));
 
     User? user = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
 

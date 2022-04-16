@@ -34,7 +34,7 @@ public class BlogController : ControllerBase
       blogResponses.Add(blogResponse);
     }
 
-    BlogListResponse blogList = new BlogListResponse { Blogs = blogResponses };
+    BlogListResponse blogList = new BlogListResponse { Blogs = blogResponses.OrderByDescending(x => x.CreatedDate).ToList() };
 
     return Ok(blogList);
   }
@@ -107,7 +107,7 @@ public class BlogController : ControllerBase
     Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
     if (blog == null)
-      return NotFound("Blog is not found.");
+      return NotFound(new ErrorMessage("Blog is not found."));
 
     string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
 

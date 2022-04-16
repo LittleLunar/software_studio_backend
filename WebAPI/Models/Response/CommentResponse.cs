@@ -7,11 +7,8 @@ public class CommentResponse
   [JsonPropertyName("comment_id")]
   public string CommentId { get; set; } = null!;
 
-  [JsonPropertyName("user_picture")]
-  public string? UserPicture { get; set; }
-
-  [JsonPropertyName("user_displayname")]
-  public string Username { get; set; } = null!;
+  [JsonPropertyName("author")]
+  public UserResponse Author { get; set; } = null!;
 
   [JsonPropertyName("comment")]
   public string Comment { get; set; } = null!;
@@ -30,8 +27,7 @@ public class CommentResponse
   public CommentResponse(Comment comment, User user)
   {
     this.CommentId = comment.Id;
-    this.UserPicture = user.ProfileImage;
-    this.Username = user.Name;
+    this.Author = new UserResponse(user);
     this.Comment = comment.Detail;
     this.Like = comment.Like.Count;
     this.LikeUser = comment.Like;
