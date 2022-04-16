@@ -1,0 +1,49 @@
+version: '2'
+services:
+  webapi:
+    container_name: softstu_webapi
+    build:
+      context: ../
+      dockerfile: ./docker/webapi.Dockerfile
+    
+    restart: unless-stopped
+    ports:
+      - "7077:80"
+
+    networks:
+      - softstu-network
+
+    command: ["dotnet", "software_studio_backend.dll"]
+
+  mongoDB:
+    container_name: softstu_mongo
+    image: mongo:5.0.7
+    volumes:
+      - ../database:/data/db
+
+    restart: unless-stopped
+    networks:
+      - softstu-network
+
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=username
+      - MONGO_INITDB_ROOT_PASSWORD=password
+
+  nginx:
+    container_name: softstu_nginx
+    build: 
+      context: ../
+      dockerfile: ./docker/nginx.Dockerfile
+
+    ports:
+      - "80:80"
+    
+    restart: unless-stopped
+    networks:
+      - softstu-network
+
+networks:
+  softstu-network:
+    name: softstu_network
+    driver: bridge
+    

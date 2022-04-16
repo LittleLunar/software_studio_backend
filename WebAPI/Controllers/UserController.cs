@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using software_studio_backend.Utils;
 namespace software_studio_backend.Controllers;
 
 [ApiController]
@@ -49,7 +50,8 @@ public class UserController : ControllerBase
     if (user == null)
       return NotFound(new ErrorMessage("User is not found."));
 
-    user.Password = body.Password;
+    string encryptedPass = PasswordEncryption.Encrypt(body.Password);
+    user.Password = encryptedPass;
 
     await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Username == username, user);
 

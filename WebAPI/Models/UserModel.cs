@@ -35,7 +35,10 @@ public class User
   public bool Banned { get; set; } = false;
 
   [BsonElement("created_date")]
-  public DateTime Created_date { get; set; } = DateTime.Now;
+  public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+  [BsonElement("updated_date")]
+  public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
   public override string ToString()
   {

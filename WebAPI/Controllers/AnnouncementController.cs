@@ -61,6 +61,7 @@ public class AnnouncementController : ControllerBase
 
   [Authorize(Roles = "admin")]
   [HttpPost]
+  [Route("create")]
   public async Task<IActionResult> CreateAnnouncement([FromBody] CreateAnnounceRequest body)
   {
     string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
@@ -80,15 +81,15 @@ public class AnnouncementController : ControllerBase
 
   [Authorize(Roles = "admin")]
   [HttpPatch]
-  [Route("{id:length(24)}/update")]
-  public async Task<IActionResult> UpdateAnnouncement(string id, [FromBody] UpdateContentRequest body)
+  [Route("update/{id:length(24)}")]
+  public async Task<IActionResult> UpdateAnnouncement(string id, [FromBody] EditContentRequest body)
   {
     Announcement? announcement = await _mongoDB.AnnouncementCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
     if (announcement == null)
       return NotFound("Announcement is not found.");
 
-    announcement.Detail = body.UpdatedContent;
+    announcement.Detail = body.Content;
     announcement.UpdatedDate = DateTime.Now;
 
     await _mongoDB.AnnouncementCollection.ReplaceOneAsync(x => x.Id == id, announcement);
@@ -124,7 +125,7 @@ public class AnnouncementController : ControllerBase
 
   [Authorize(Roles = "admin")]
   [HttpDelete]
-  [Route("{id:length(24)}")]
+  [Route("delete/{id:length(24)}")]
   public async Task<IActionResult> DeleteAnnouncement(string id)
   {
     Announcement? announcement = await _mongoDB.AnnouncementCollection.Find(x => x.Id == id).FirstOrDefaultAsync();

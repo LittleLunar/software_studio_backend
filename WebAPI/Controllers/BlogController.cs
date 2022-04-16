@@ -73,6 +73,7 @@ public class BlogController : ControllerBase
 
   [Authorize(Roles = "admin")]
   [HttpPost]
+  [Route("create")]
   public async Task<IActionResult> CreateBlog([FromBody] CreateBlogRequest body)
   {
     string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
@@ -92,15 +93,15 @@ public class BlogController : ControllerBase
 
   [Authorize(Roles = "admin")]
   [HttpPatch]
-  [Route("{id:length(24)}/update")]
-  public async Task<IActionResult> UpdateBlog(string id, [FromBody] UpdateContentRequest body)
+  [Route("update/{id:length(24)}")]
+  public async Task<IActionResult> UpdateBlog(string id, [FromBody] EditContentRequest body)
   {
     Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
     if (blog == null)
       return NotFound("Blog is not found.");
 
-    blog.Detail = body.UpdatedContent;
+    blog.Detail = body.Content;
     blog.UpdatedDate = DateTime.Now;
 
     await _mongoDB.BlogCollection.ReplaceOneAsync(x => x.Id == id, blog);
@@ -110,7 +111,7 @@ public class BlogController : ControllerBase
 
   [Authorize]
   [HttpPatch]
-  [Route("{id:length(24)}/like")]
+  [Route("like/{id:length(24)}")]
   public async Task<IActionResult> LikeBlog(string id)
   {
     Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
@@ -136,7 +137,7 @@ public class BlogController : ControllerBase
 
   [Authorize(Roles = "admin")]
   [HttpDelete]
-  [Route("{id:length(24)}")]
+  [Route("delete/{id:length(24)}")]
   public async Task<IActionResult> DeleteBlog(string id)
   {
     Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
