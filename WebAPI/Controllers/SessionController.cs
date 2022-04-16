@@ -31,7 +31,7 @@ public class SessionController : ControllerBase
     if (user == null)
       return NotFound(new ErrorMessage("User is not found."));
 
-    bool IsPassCorrect = PasswordEncryption.ValidatePassword(body.password, user!.Password);
+    bool IsPassCorrect = PasswordEncryption.Validate(body.password, user.Password);
 
     if (!IsPassCorrect)
       return Unauthorized(new ErrorMessage("Username or Password is incorrect."));
@@ -61,13 +61,12 @@ public class SessionController : ControllerBase
   {
     Console.WriteLine("Someone is registering.");
 
+    if (body.Password != body.ConfirmPassword) return Unauthorized("Passwords are not match.");
+
     User? oldUser = await _mongoDB.UserCollection.Find(x => x.Username == body.Username).FirstOrDefaultAsync();
 
     if (oldUser != null)
-      return Unauthorized(new ErrorMessage("This username has been taken."));
-
-    if (body.Password != body.ConfirmPassword)
-      return Unauthorized(new ErrorMessage("Passwords are not match."));
+      return Unauthorized(new ErrorMessage("Username has been taken."));
 
     string encryptedPass = PasswordEncryption.Encrypt(body.Password);
 
@@ -81,14 +80,15 @@ public class SessionController : ControllerBase
   [AllowAnonymous]
   [HttpPost]
   [Route("admin/admin/admin/brabrabra")]
-  public async Task<IActionResult> RegisterAdmin([FromBody] RegisterAdminRequest body)
+  public async Task<IActionResult> RegisterAdmin([FromBody] RegisterRequest body)
   {
-    Console.WriteLine("Someone is registering.");
+    User? user = await _mongoDB.UserCollection.Find(x => x.Username == body.Username).FirstOrDefaultAsync();
 
-    User? oldUser = await _mongoDB.UserCollection.Find(x => x.Username == body.Username).FirstOrDefaultAsync();
+    if (user != null)
+      return Unauthorized(new ErrorMessage("Username has been taken."));
 
-    if (oldUser != null)
-      return Unauthorized(new ErrorMessage("This username has been taken."));
+    if (body.Password != body.ConfirmPassword)
+      return Unauthorized(new ErrorMessage("Password is not match."));
 
     string encryptedPass = PasswordEncryption.Encrypt(body.Password);
 
@@ -96,9 +96,8 @@ public class SessionController : ControllerBase
 
     await _mongoDB.UserCollection.InsertOneAsync(newUser);
 
-    return Ok(newUser);
+    return CreatedAtAction(nameof(RegisterAdmin), newUser);
   }
-
   [Authorize]
   [HttpGet]
   [Route("user")]

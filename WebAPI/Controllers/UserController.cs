@@ -26,7 +26,7 @@ public class UserController : ControllerBase
   {
     List<User> users = await _mongoDB.UserCollection.Find(_ => true).ToListAsync();
 
-    return Ok(users.OrderByDescending(x => x.Created_date));
+    return Ok(users.OrderByDescending(x => x.CreatedDate));
   }
 
   [Authorize]

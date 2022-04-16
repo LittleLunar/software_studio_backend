@@ -1,29 +1,31 @@
-using System.Security.Cryptography;
 using System.Text;
+using System.Security.Cryptography;
 using software_studio_backend.Shared;
 namespace software_studio_backend.Utils;
 
-public class PasswordEncryption
+public static class PasswordEncryption
 {
   public static string Encrypt(string password)
   {
-    Byte[] textBytes = Encoding.UTF8.GetBytes(password);
-    Byte[] keyBytes = Encoding.UTF8.GetBytes(Configuration.staticConfig["HmacSHA256:Key"]);
+    byte[] textBytes = Encoding.UTF8.GetBytes(password);
+    byte[] keyBytes = Encoding.UTF8.GetBytes(Configuration.staticConfig["Hmac:Key"]);
 
-    Byte[] hashBytes;
+    byte[] hashBytes;
     using (HMACSHA256 hash = new HMACSHA256(keyBytes))
     {
       hashBytes = hash.ComputeHash(textBytes);
     }
+
     string encrypted = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+
     return encrypted;
   }
 
-  public static bool ValidatePassword(string pass1, string encryptedPass)
+  public static bool Validate(string pass, string encrypted)
   {
-    string encrypted1 = Encrypt(pass1);
+    string encryptedpass = Encrypt(pass);
 
-    if (encrypted1 != encryptedPass)
+    if (encryptedpass != encrypted)
       return false;
 
     return true;
