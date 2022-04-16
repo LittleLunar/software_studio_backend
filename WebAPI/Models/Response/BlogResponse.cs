@@ -32,10 +32,7 @@ public class BlogResponse
   [JsonPropertyName("updated_date")]
   public DateTime UpdatedDate { get; set; }
 
-  [JsonPropertyName("comments")]
-  public List<CommentResponse> Comments { get; set; } = new List<CommentResponse>();
-
-  public BlogResponse(Blog blog, User user, List<CommentResponse>? comments = null)
+  public BlogResponse(Blog blog, User user)
   {
     this.BlogId = blog.Id;
     this.Author = new UserResponse(user);
@@ -46,6 +43,5 @@ public class BlogResponse
     this.LikeUsers = blog.Like;
     this.CreatedDate = blog.CreatedDate;
     this.UpdatedDate = blog.UpdatedDate;
-    this.Comments = comments ?? this.Comments;
   }
 }

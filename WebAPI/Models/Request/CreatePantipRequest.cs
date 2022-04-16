@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 namespace software_studio_backend.Models;
 
-public class CreateAnnounceRequest
+public class CreatePantipRequest
 {
   [Required]
   [JsonPropertyName("topic")]

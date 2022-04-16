@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace software_studio_backend.Models;
 
-public class Announcement
+public class Pantip
 {
   [BsonId]
   [BsonRepresentation(BsonType.ObjectId)]
@@ -15,6 +15,9 @@ public class Announcement
 
   [BsonElement("detail")]
   public string Detail { get; set; } = "";
+
+  [BsonElement("like")]
+  public List<string> Like { get; set; } = new List<string>();
 
   [BsonElement("user_id")]
   [BsonRepresentation(BsonType.ObjectId)]

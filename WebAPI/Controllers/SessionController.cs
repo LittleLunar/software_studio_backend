@@ -61,12 +61,13 @@ public class SessionController : ControllerBase
   {
     Console.WriteLine("Someone is registering.");
 
-    if (body.Password != body.ConfirmPassword) return Unauthorized("Passwords are not match.");
+    if (body.Password != body.ConfirmPassword) 
+      return Unauthorized(new ErrorMessage("Passwords do not match."));
 
     User? oldUser = await _mongoDB.UserCollection.Find(x => x.Username == body.Username).FirstOrDefaultAsync();
 
     if (oldUser != null)
-      return Unauthorized(new ErrorMessage("Username has been taken."));
+      return Unauthorized(new ErrorMessage("This username has been taken."));
 
     string encryptedPass = PasswordEncryption.Encrypt(body.Password);
 
@@ -85,10 +86,10 @@ public class SessionController : ControllerBase
     User? user = await _mongoDB.UserCollection.Find(x => x.Username == body.Username).FirstOrDefaultAsync();
 
     if (user != null)
-      return Unauthorized(new ErrorMessage("Username has been taken."));
+      return Unauthorized(new ErrorMessage("This username has been taken."));
 
     if (body.Password != body.ConfirmPassword)
-      return Unauthorized(new ErrorMessage("Password is not match."));
+      return Unauthorized(new ErrorMessage("Passwords do not match."));
 
     string encryptedPass = PasswordEncryption.Encrypt(body.Password);
 

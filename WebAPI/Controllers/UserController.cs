@@ -26,7 +26,7 @@ public class UserController : ControllerBase
   {
     List<User> users = await _mongoDB.UserCollection.Find(_ => true).ToListAsync();
 
-    return Ok(users.OrderByDescending(x => x.CreatedDate));
+    return Ok(users.OrderByDescending(x => x.CreatedDate).ToList());
   }
 
   [Authorize]
@@ -39,7 +39,7 @@ public class UserController : ControllerBase
     User? user = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
 
     if (user == null)
-      return NotFound("User is not found.");
+      return NotFound(new ErrorMessage("User is not found."));
 
     UserResponse userResponse = new UserResponse(user);
 
@@ -52,7 +52,7 @@ public class UserController : ControllerBase
   public async Task<IActionResult> ResetPassword([FromBody] ResetPassRequest body)
   {
     if (body.Password != body.ConfirmPassword)
-      return Unauthorized(new ErrorMessage("Password is not match."));
+      return Unauthorized(new ErrorMessage("Passwords do not match."));
 
     string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
 
@@ -75,16 +75,20 @@ public class UserController : ControllerBase
   {
     string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
 
-    User? user = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
+    User? updatedUser = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
 
-    if (user == null)
+    if (updatedUser == null)
       return NotFound(new ErrorMessage("User is not found."));
 
     if (body.Name != null)
-      user.Name = body.Name;
+      updatedUser.Name = body.Name;
 
     if (body.ProfileImage != null)
-      user.ProfileImage = body.ProfileImage;
+      updatedUser.ProfileImage = body.ProfileImage;
+
+    updatedUser.UpdatedDate = DateTime.Now;
+
+    await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Id == id, updatedUser);
 
     return NoContent();
 

@@ -10,7 +10,7 @@ public class DatabaseSettings
 
   public string? BlogsCollectionName { get; set; }
 
-  public string? AnnouncementsCollectionName { get; set; }
+  public string? PantipsCollectionName { get; set; }
 
   public string? CommentsCollectionName { get; set; }
 }

@@ -20,6 +20,7 @@ public class BlogController : ControllerBase
 
   [AllowAnonymous]
   [HttpGet]
+  [Route("list")]
   public async Task<IActionResult> GetBlogs() // All blogs page
   {
     List<Blog> blogs = await _mongoDB.BlogCollection.Find(_ => true).ToListAsync();
@@ -49,23 +50,12 @@ public class BlogController : ControllerBase
     if (blog == null)
       return NotFound(new ErrorMessage("Blog is not found"));
 
-    User author = await _mongoDB.UserCollection.Find(x => x.Id == blog.UserId).FirstAsync();
+    User? author = await _mongoDB.UserCollection.Find(x => x.Id == blog.UserId).FirstOrDefaultAsync();
 
     if (author == null)
       return NotFound(new ErrorMessage("Author is not found"));
 
-    List<CommentResponse> comments = new List<CommentResponse>();
-
-    List<Comment> commentsInBlog = await _mongoDB.CommentCollection.Find(x => x.ContentId == blog.Id).ToListAsync();
-
-    foreach (Comment comment in commentsInBlog)
-    {
-      User user = await _mongoDB.UserCollection.Find(x => x.Id == comment.UserId).FirstAsync();
-
-      comments.Add(new CommentResponse(comment, user));
-    }
-
-    BlogResponse blogResponse = new BlogResponse(blog, author, comments);
+    BlogResponse blogResponse = new BlogResponse(blog, author);
 
     return Ok(blog);
 
@@ -146,7 +136,6 @@ public class BlogController : ControllerBase
       return NotFound(new ErrorMessage("Blog is not Found."));
 
     await _mongoDB.BlogCollection.DeleteOneAsync(x => x.Id == id);
-    await _mongoDB.CommentCollection.DeleteManyAsync(x => x.ContentId == id);
 
     return NoContent();
   }
