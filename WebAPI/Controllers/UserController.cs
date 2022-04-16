@@ -1,10 +1,10 @@
 using software_studio_backend.Models;
 using software_studio_backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using software_studio_backend.Utils;
 using MongoDB.Driver;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using software_studio_backend.Utils;
 namespace software_studio_backend.Controllers;
 
 [ApiController]
@@ -18,10 +18,21 @@ public class UserController : ControllerBase
     _mongoDB = mongoDBService;
   }
 
+
+  [Authorize(Roles = "admin")]
+  [HttpGet]
+  [Route("list")]
+  public async Task<IActionResult> GetUserList()
+  {
+    List<User> users = await _mongoDB.UserCollection.Find(_ => true).ToListAsync();
+
+    return Ok(users.OrderByDescending(x => x.CreatedDate));
+  }
+
   [Authorize]
   [HttpGet]
-  [Route("profile/{id:length(24)}")]
-  public async Task<IActionResult> GetUserProfile(string id)
+  [Route("profile")]
+  public async Task<IActionResult> GetUserProfile()
   {
     string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
 
@@ -50,8 +61,7 @@ public class UserController : ControllerBase
     if (user == null)
       return NotFound(new ErrorMessage("User is not found."));
 
-    string encryptedPass = PasswordEncryption.Encrypt(body.Password);
-    user.Password = encryptedPass;
+    user.Password = PasswordEncryption.Encrypt(body.Password);
 
     await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Username == username, user);
 
@@ -107,7 +117,7 @@ public class UserController : ControllerBase
   }
 
   [Authorize(Roles = "admin")]
-  [HttpDelete]
+  [HttpPatch]
   [Route("banned/{id:length(24)}")]
   public async Task<IActionResult> BanUser(string id)
   {

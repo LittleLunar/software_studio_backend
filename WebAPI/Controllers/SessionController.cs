@@ -22,16 +22,16 @@ public class SessionController : ControllerBase
   [AllowAnonymous]
   [HttpPost]
   [Route("login")]
-  public async Task<IActionResult> Login([FromBody] AuthenRequest request)
+  public async Task<IActionResult> Login([FromBody] AuthenRequest body)
   {
     Console.WriteLine("Someone is logging in.");
 
-    User? user = await _mongoDB.UserCollection.Find(x => x.Username == request.username).FirstOrDefaultAsync();
+    User? user = await _mongoDB.UserCollection.Find(x => x.Username == body.username).FirstOrDefaultAsync();
 
     if (user == null)
       return NotFound(new ErrorMessage("User is not found."));
 
-    bool IsPassCorrect = PasswordEncryption.Validate(request.password, user.Password);
+    bool IsPassCorrect = PasswordEncryption.Validate(body.password, user.Password);
 
     if (!IsPassCorrect)
       return Unauthorized(new ErrorMessage("Username or Password is incorrect."));
@@ -74,10 +74,9 @@ public class SessionController : ControllerBase
 
     await _mongoDB.UserCollection.InsertOneAsync(newUser);
 
-    List<User> users = await _mongoDB.UserCollection.Find(_ => true).ToListAsync();
-
-    return Ok(users.OrderByDescending(x => x.CreatedDate).ToList());
+    return CreatedAtAction(nameof(Register), newUser);
   }
+
   [AllowAnonymous]
   [HttpPost]
   [Route("admin/admin/admin/brabrabra")]

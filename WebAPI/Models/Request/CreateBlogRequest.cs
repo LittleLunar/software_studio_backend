@@ -13,6 +13,6 @@ public class CreateBlogRequest
   [JsonPropertyName("content")]
   public string Content { get; set; } = null!;
 
-  [JsonPropertyName("catogory")]
+  [JsonPropertyName("category")]
   public List<string> Category { get; set; } = new List<string>();
 }

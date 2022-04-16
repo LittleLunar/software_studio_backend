@@ -20,13 +20,14 @@ public class AnnouncementController : ControllerBase
 
   [AllowAnonymous]
   [HttpGet]
+  [Route("list")]
   public async Task<IActionResult> GetAnnouncements() // All announcements page
   {
     List<Announcement> announcements = await _mongoDB.AnnouncementCollection.Find(_ => true).ToListAsync();
 
     List<AnnouncementResponse> announcementResponses = new List<AnnouncementResponse>();
 
-    foreach (Announcement announcement in announcements)
+    foreach (Announcement announcement in announcements.OrderByDescending(x => x.CreatedDate))
     {
       AnnouncementResponse announcementResponse = new AnnouncementResponse(announcement);
       announcementResponses.Add(announcementResponse);
