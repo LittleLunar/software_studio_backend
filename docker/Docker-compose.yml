@@ -18,7 +18,8 @@ services:
     image: mongo:5.0.7
     volumes:
       - ../database:/data/db
-
+    ports:
+      - "27017:27017"
     restart: unless-stopped
     networks:
       - softstu-network

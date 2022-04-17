@@ -27,7 +27,7 @@ public class TokenUtils
       new Claim("username", user.Username),
       new Claim(ClaimTypes.Role, user.Role),
       new Claim("display_name", user.Name),
-    new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString()),
+      new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString()),
       new Claim(JwtRegisteredClaimNames.Exp, DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec).ToString())
     };
 

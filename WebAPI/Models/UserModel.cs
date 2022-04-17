@@ -28,9 +28,6 @@ public class User
   [JsonPropertyName("profile_image")]
   public string? ProfileImage { get; set; }
 
-  [BsonElement("active")]
-  public bool Active { get; set; } = true;
-
   [BsonElement("banned")]
   public bool Banned { get; set; } = false;
 

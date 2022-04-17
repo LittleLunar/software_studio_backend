@@ -14,6 +14,7 @@ public class Blog
   public string Topic { get; set; } = null!;
 
   [BsonElement("detail")]
+  
   public string Detail { get; set; } = "";
 
   [BsonElement("category")]

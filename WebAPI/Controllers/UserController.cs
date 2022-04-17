@@ -131,7 +131,6 @@ public class UserController : ControllerBase
       return NotFound(new ErrorMessage("User is not found."));
 
     user.Banned = true;
-    user.Active = false;
 
     await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Id == id, user);
 
