@@ -24,10 +24,13 @@ public class TokenUtils
   public static string GenerateAccessToken(User user)
   {
     Claim[] claims = new Claim[] {
-      new Claim(ClaimTypes.Name, user.Username),
-      new Claim(ClaimTypes.Role, user.Role),
-      new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString())
+      new Claim("username", user.Username),
+      new Claim("role", user.Role),
+      new Claim("display_name", user.Name),
+    new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString()),
+      new Claim(JwtRegisteredClaimNames.Exp, DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec).ToString())
     };
+
     return GenerateToken(DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec), claims);
 
   }
@@ -35,7 +38,7 @@ public class TokenUtils
   public static string GenerateRefreshToken(User user)
   {
     Claim[] claims = new Claim[] {
-      new Claim(ClaimTypes.Name, user.Username)
+      new Claim("username", user.Username)
     };
     return GenerateToken(DateTime.Now.AddMonths(Constant.Number.RefreshTokenExpiresInMonths), claims);
   }

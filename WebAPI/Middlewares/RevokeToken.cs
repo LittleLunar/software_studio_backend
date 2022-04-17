@@ -56,10 +56,11 @@ public class RevokeToken
   private async Task<User> DeserializeUser(string token)
   {
     string data = new JwtSecurityTokenHandler().ReadJwtToken(token).Payload.SerializeToJson();
+    // Console.WriteLine(data);
 
     JObject jsonData = JObject.Parse(data);
 
-    User? user = await _mongoDB.UserCollection.Find(x => x.Username == jsonData[ClaimTypes.Name]!.ToString()).FirstOrDefaultAsync();
+    User? user = await _mongoDB.UserCollection.Find(x => x.Username == jsonData["username"]!.ToString()).FirstOrDefaultAsync();
 
     return user;
   }

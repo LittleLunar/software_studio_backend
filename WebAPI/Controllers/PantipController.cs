@@ -77,7 +77,7 @@ public class PantipController : ControllerBase
   [Route("create")]
   public async Task<IActionResult> CreatePantip([FromBody] CreatePantipRequest body)
   {
-    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
       return Unauthorized(new ErrorMessage("You are not authorized user."));
@@ -97,7 +97,7 @@ public class PantipController : ControllerBase
   [Route("update/{id:length(24)}")]
   public async Task<IActionResult> UpdatePantip(string id, [FromBody] EditContentRequest body)
   {
-    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
       return Unauthorized(new ErrorMessage("You are not authorized user."));
@@ -133,7 +133,7 @@ public class PantipController : ControllerBase
     if (pantip == null)
       return NotFound(new ErrorMessage("Pantip is not found."));
 
-    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
       return Unauthorized(new ErrorMessage("You are not authorized user."));

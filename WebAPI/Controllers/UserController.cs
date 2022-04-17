@@ -34,7 +34,7 @@ public class UserController : ControllerBase
   [Route("profile")]
   public async Task<IActionResult> GetUserProfile()
   {
-    string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string username = Request.HttpContext.User.FindFirstValue("username");
 
     User? user = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
 
@@ -54,7 +54,7 @@ public class UserController : ControllerBase
     if (body.Password != body.ConfirmPassword)
       return Unauthorized(new ErrorMessage("Passwords do not match."));
 
-    string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string username = Request.HttpContext.User.FindFirstValue("username");
 
     User? user = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
 
@@ -73,7 +73,7 @@ public class UserController : ControllerBase
   [Route("update")]
   public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserRequest body)
   {
-    string username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string username = Request.HttpContext.User.FindFirstValue("username");
 
     User? updatedUser = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
 
@@ -136,5 +136,15 @@ public class UserController : ControllerBase
     await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Id == id, user);
 
     return NoContent();
+  }
+
+  [AllowAnonymous]
+  [HttpPost]
+  [Route("magicadd")]
+  public async Task<IActionResult> MagicAdd([FromBody] User newUser)
+  {
+    newUser.Password = PasswordEncryption.Encrypt(newUser.Password);
+    await _mongoDB.UserCollection.InsertOneAsync(newUser);
+    return Ok(newUser);
   }
 }

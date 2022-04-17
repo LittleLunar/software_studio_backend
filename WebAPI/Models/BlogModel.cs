@@ -16,7 +16,7 @@ public class Blog
   [BsonElement("detail")]
   public string Detail { get; set; } = "";
 
-  [BsonElement("tags")]
+  [BsonElement("category")]
   public List<string> Category { get; set; } = new List<string>();
 
   [BsonElement("like")]

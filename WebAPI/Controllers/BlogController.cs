@@ -66,7 +66,7 @@ public class BlogController : ControllerBase
   [Route("create")]
   public async Task<IActionResult> CreateBlog([FromBody] CreateBlogRequest body)
   {
-    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
       return Unauthorized(new ErrorMessage("You are not authorized user."));
@@ -109,7 +109,7 @@ public class BlogController : ControllerBase
     if (blog == null)
       return NotFound(new ErrorMessage("Blog is not found."));
 
-    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
       return Unauthorized(new ErrorMessage("You are not authorized user."));
@@ -140,4 +140,12 @@ public class BlogController : ControllerBase
     return NoContent();
   }
 
+  [AllowAnonymous]
+  [HttpPost]
+  [Route("magicadd")]
+  public async Task<IActionResult> MagicAdd([FromBody] Blog newBlog)
+  {
+    await _mongoDB.BlogCollection.InsertOneAsync(newBlog);
+    return Ok(newBlog);
+  }
 }

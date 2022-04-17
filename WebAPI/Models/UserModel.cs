@@ -18,7 +18,7 @@ public class User
 
   [BsonElement("name")]
   [JsonPropertyName("name")]
-  public string Name { get; set; } = null!;
+  public string Name { get; set; } = "";
 
   [BsonElement("role")]
   [JsonPropertyName("role")]
@@ -40,6 +40,10 @@ public class User
   [BsonElement("updated_date")]
   public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
+  public User()
+  {
+    this.Name = this.Username;
+  }
   public override string ToString()
   {
     return Username;

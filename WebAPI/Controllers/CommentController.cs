@@ -46,7 +46,7 @@ public class CommentController : ControllerBase
   [Route("create")]
   public async Task<IActionResult> CreateComment([FromBody] CreateCommentRequest body)
   {
-    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
       return Unauthorized(new ErrorMessage("You are not authorized user."));
@@ -68,7 +68,7 @@ public class CommentController : ControllerBase
   [Route("update/{id:length(24)}")]
   public async Task<IActionResult> UpdateComment(string id, [FromBody] EditContentRequest body)
   {
-    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
       return Unauthorized(new ErrorMessage("You are not authorized user."));
@@ -99,7 +99,7 @@ public class CommentController : ControllerBase
   [Route("like/{id:length(24)}")]
   public async Task<IActionResult> LikeComment(string id)
   {
-    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
       return Unauthorized(new ErrorMessage("You are not authorized user."));
@@ -125,7 +125,7 @@ public class CommentController : ControllerBase
   [Route("delete/{id:length(24)}")]
   public async Task<IActionResult> DeleteComment(string id)
   {
-    string? username = Request.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+    string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
       return Unauthorized(new ErrorMessage("You are not authorized user."));
