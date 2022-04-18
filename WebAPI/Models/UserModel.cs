@@ -14,6 +14,7 @@ public class User
   public string Username { get; set; } = null!;
 
   [BsonElement("password")]
+  [JsonIgnore]
   public string Password { get; set; } = null!;
 
   [BsonElement("name")]

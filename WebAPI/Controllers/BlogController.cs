@@ -162,7 +162,7 @@ public class BlogController : ControllerBase
 
   [HttpDelete]
   [Route("delete/{id:length(24)}")]
-  gi public async Task<IActionResult> DeleteBlog(string id)
+  public async Task<IActionResult> DeleteBlog(string id)
   {
     string? username = Request.HttpContext.User.FindFirstValue("username");
 
