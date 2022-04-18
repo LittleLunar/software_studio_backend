@@ -11,7 +11,6 @@ public class MongoDBService
 
   public IMongoCollection<Blog> BlogCollection { get; private set; }
 
-  public IMongoCollection<Pantip> PantipCollection { get; private set; }
   public IMongoCollection<Comment> CommentCollection { get; private set; }
   public MongoDBService(
     IOptions<DatabaseSettings> databaseSettings
@@ -35,9 +34,6 @@ public class MongoDBService
       databaseSettings.Value.BlogsCollectionName
     );
 
-    PantipCollection = mongoDatabase.GetCollection<Pantip>(
-      databaseSettings.Value.PantipsCollectionName
-    );
 
     CommentCollection = mongoDatabase.GetCollection<Comment>(
       databaseSettings.Value.CommentsCollectionName

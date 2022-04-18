@@ -29,12 +29,19 @@ public class User
   public string? ProfileImage { get; set; }
 
   [BsonElement("banned")]
+  [JsonPropertyName("banned")]
   public bool Banned { get; set; } = false;
 
+  [BsonElement("deleted")]
+  [JsonPropertyName("deleted")]
+  public bool Deleted { get; set; } = false;
+
   [BsonElement("created_date")]
+  [JsonPropertyName("created_date")]
   public DateTime CreatedDate { get; set; } = DateTime.Now;
 
   [BsonElement("updated_date")]
+  [JsonPropertyName("updated_date")]
   public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
   public User()

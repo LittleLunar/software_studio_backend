@@ -11,6 +11,7 @@ namespace software_studio_backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CommentController : ControllerBase
 {
   private readonly MongoDBService _mongoDB;
@@ -20,28 +21,6 @@ public class CommentController : ControllerBase
     _mongoDB = mongoDBService;
   }
 
-  [Authorize]
-  [HttpGet]
-  [Route("list")]
-  public async Task<IActionResult> GetComments()
-  {
-    List<Comment> comments = await _mongoDB.CommentCollection.Find(_ => true).ToListAsync();
-
-    List<CommentResponse> commentResponses = new List<CommentResponse>();
-
-    foreach (Comment comment in comments)
-    {
-      User user = await _mongoDB.UserCollection.Find(x => x.Id == comment.UserId).FirstAsync();
-      CommentResponse commentResponse = new CommentResponse(comment, user);
-      commentResponses.Add(commentResponse);
-    }
-
-    CommentListResponse commentList = new CommentListResponse { Comments = commentResponses.OrderByDescending(x => x.CreatedDate).ToList() };
-
-    return Ok(commentList);
-  }
-
-  [Authorize]
   [HttpPost]
   [Route("create")]
   public async Task<IActionResult> CreateComment([FromBody] CreateCommentRequest body)
@@ -49,12 +28,12 @@ public class CommentController : ControllerBase
     string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
-      return Unauthorized(new ErrorMessage("You are not authorized user."));
+      return Unauthorized("You are not authorized user.");
 
-    User? author = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
+    User? author = await _mongoDB.UserCollection.Find(x => x.Username == username && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
 
     if (author == null)
-      return NotFound(new ErrorMessage("User is not found."));
+      return NotFound("User is not found.");
 
     Comment newComment = new Comment { Detail = body.Content, ContentId = body.ContentId, UserId = author.Id };
 
@@ -63,7 +42,6 @@ public class CommentController : ControllerBase
     return CreatedAtAction(nameof(CreateComment), newComment);
   }
 
-  [Authorize]
   [HttpPatch]
   [Route("update/{id:length(24)}")]
   public async Task<IActionResult> UpdateComment(string id, [FromBody] EditContentRequest body)
@@ -71,30 +49,29 @@ public class CommentController : ControllerBase
     string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
-      return Unauthorized(new ErrorMessage("You are not authorized user."));
+      return Unauthorized("You are not authorized user.");
 
-    User? author = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
+    User? author = await _mongoDB.UserCollection.Find(x => x.Username == username && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
 
     if (author == null)
-      return NotFound(new ErrorMessage("User is not found"));
+      return NotFound("User is not found");
 
-    Comment? updatedComment = await _mongoDB.CommentCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+    Comment? comment = await _mongoDB.CommentCollection.Find(x => x.Id == id && !x.Delete).FirstOrDefaultAsync();
 
-    if (updatedComment == null)
-      return NotFound(new ErrorMessage("Comment is not found."));
+    if (comment == null)
+      return NotFound("Comment is not found.");
 
-    if (author.Id != updatedComment.UserId)
-      return Unauthorized(new ErrorMessage("You are not the author of this comment."));
+    if (author.Id != comment.UserId)
+      return Unauthorized("You are not the author of this comment.");
 
-    updatedComment.Detail = body.Content;
-    updatedComment.UpdatedDate = DateTime.Now;
+    comment.Detail = body.Content ?? comment.Detail;
+    comment.UpdatedDate = DateTime.Now;
 
-    await _mongoDB.CommentCollection.ReplaceOneAsync(x => x.Id == id, updatedComment);
+    await _mongoDB.CommentCollection.ReplaceOneAsync(x => x.Id == id, comment);
 
-    return Ok(updatedComment);
+    return Ok(comment);
   }
 
-  [Authorize]
   [HttpPatch]
   [Route("like/{id:length(24)}")]
   public async Task<IActionResult> LikeComment(string id)
@@ -102,12 +79,12 @@ public class CommentController : ControllerBase
     string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
-      return Unauthorized(new ErrorMessage("You are not authorized user."));
+      return Unauthorized("You are not authorized user.");
 
-    Comment? comment = await _mongoDB.CommentCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+    Comment? comment = await _mongoDB.CommentCollection.Find(x => x.Id == id && !x.Delete).FirstOrDefaultAsync();
 
     if (comment == null)
-      return NotFound(new ErrorMessage("Comment is not found."));
+      return NotFound("Comment is not found.");
 
     if (comment.Like.Contains(username))
       comment.Like.Remove(username);
@@ -120,7 +97,6 @@ public class CommentController : ControllerBase
 
   }
 
-  [Authorize]
   [HttpDelete]
   [Route("delete/{id:length(24)}")]
   public async Task<IActionResult> DeleteComment(string id)
@@ -128,40 +104,26 @@ public class CommentController : ControllerBase
     string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
-      return Unauthorized(new ErrorMessage("You are not authorized user."));
+      return Unauthorized("You are not authorized user.");
 
     User? user = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
 
     if (user == null)
-      return NotFound(new ErrorMessage("User is not found."));
+      return NotFound("User is not found.");
 
-    Comment? comment = await _mongoDB.CommentCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+    Comment? comment = await _mongoDB.CommentCollection.Find(x => x.Id == id && !x.Delete).FirstOrDefaultAsync();
 
     if (comment == null)
-      return NotFound(new ErrorMessage("Comment is not found."));
+      return NotFound("Comment is not found.");
 
     if (comment.UserId != user.Id)
-      return Unauthorized(new ErrorMessage("You are not the author of this comment."));
+      return Unauthorized("You are not the author of this comment.");
 
-    await _mongoDB.CommentCollection.DeleteOneAsync(x => x.Id == id);
+    comment.Delete = true;
 
-    return NoContent();
-  }
-
-  [Authorize(Roles = "admin")]
-  [HttpDelete]
-  [Route("admin/delete/{id:length(24)}")]
-  public async Task<IActionResult> AdminDeleteComment(string id)
-  {
-    Comment? comment = await _mongoDB.CommentCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
-
-    if (comment == null)
-      return NotFound(new ErrorMessage("Comment is not found."));
-
-    await _mongoDB.CommentCollection.DeleteOneAsync(x => x.Id == id);
+    await _mongoDB.CommentCollection.ReplaceOneAsync(x => x.Id == id, comment);
 
     return NoContent();
-
   }
 
 }

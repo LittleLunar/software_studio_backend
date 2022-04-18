@@ -16,11 +16,19 @@ public class UserResponse
   [JsonPropertyName("profile_image")]
   public string? ProfileImage { get; set; }
 
+  [JsonPropertyName("banned")]
+  public bool Banned { get; set; }
+
+  [JsonPropertyName("deleted")]
+  public bool Deleted { get; set; }
+
   public UserResponse(User user)
   {
     this.Id = user.Id;
     this.Name = user.Name;
     this.Role = user.Role;
     this.ProfileImage = user.ProfileImage;
+    this.Banned = user.Banned;
+    this.Deleted = user.Deleted;
   }
 }

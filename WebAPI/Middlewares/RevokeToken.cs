@@ -60,7 +60,7 @@ public class RevokeToken
 
     JObject jsonData = JObject.Parse(data);
 
-    User? user = await _mongoDB.UserCollection.Find(x => x.Username == jsonData["username"]!.ToString()).FirstOrDefaultAsync();
+    User? user = await _mongoDB.UserCollection.Find(x => x.Username == jsonData["username"]!.ToString() && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
 
     return user;
   }

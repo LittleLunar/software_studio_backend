@@ -9,7 +9,7 @@ public class BlogResponse
   public string BlogId { get; set; } = null!;
 
   [JsonPropertyName("author")]
-  public UserResponse Author { get; set; } = null!;
+  public UserResponse? Author { get; set; }
 
   [JsonPropertyName("topic")]
   public string Topic { get; set; } = null!;
@@ -26,21 +26,30 @@ public class BlogResponse
   [JsonPropertyName("like_users")]
   public List<string> LikeUsers { get; set; } = null!;
 
+  [JsonPropertyName("hide")]
+  public bool Hide { get; set; }
+
+  [JsonPropertyName("deleted")]
+  public bool Deleted { get; set; }
+
   [JsonPropertyName("created_date")]
   public DateTime CreatedDate { get; set; }
 
   [JsonPropertyName("updated_date")]
   public DateTime UpdatedDate { get; set; }
 
-  public BlogResponse(Blog blog, User user)
+  public BlogResponse(Blog blog, User? user)
   {
     this.BlogId = blog.Id;
-    this.Author = new UserResponse(user);
+    if (user != null)
+      this.Author = new UserResponse(user);
     this.Topic = blog.Topic;
     this.Content = blog.Detail;
     this.Category = blog.Category;
     this.Like = blog.Like.Count;
     this.LikeUsers = blog.Like;
+    this.Hide = blog.Hide;
+    this.Deleted = blog.Deleted;
     this.CreatedDate = blog.CreatedDate;
     this.UpdatedDate = blog.UpdatedDate;
   }

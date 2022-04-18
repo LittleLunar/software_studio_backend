@@ -14,7 +14,6 @@ public class Blog
   public string Topic { get; set; } = null!;
 
   [BsonElement("detail")]
-  
   public string Detail { get; set; } = "";
 
   [BsonElement("category")]
@@ -27,6 +26,14 @@ public class Blog
   [BsonRepresentation(BsonType.ObjectId)]
   [JsonPropertyName("user_id")]
   public string UserId { get; set; } = null!;
+
+  [BsonElement("hide")]
+  [JsonPropertyName("hide")]
+  public bool Hide { get; set; } = false;
+
+  [BsonElement("deleted")]
+  [JsonPropertyName("deleted")]
+  public bool Deleted { get; set; } = false;
 
   [BsonElement("created_date")]
   public DateTime CreatedDate { get; set; } = DateTime.Now;

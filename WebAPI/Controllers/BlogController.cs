@@ -9,6 +9,7 @@ namespace software_studio_backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class BlogController : ControllerBase
 {
   private readonly MongoDBService _mongoDB;
@@ -23,13 +24,13 @@ public class BlogController : ControllerBase
   [Route("list")]
   public async Task<IActionResult> GetBlogs() // All blogs page
   {
-    List<Blog> blogs = await _mongoDB.BlogCollection.Find(_ => true).ToListAsync();
+    List<Blog> blogs = await _mongoDB.BlogCollection.Find(x => !x.Hide && !x.Deleted).ToListAsync();
 
     List<BlogResponse> blogResponses = new List<BlogResponse>();
 
     foreach (Blog blog in blogs)
     {
-      User user = await _mongoDB.UserCollection.Find(x => x.Id == blog.UserId).FirstAsync();
+      User? user = await _mongoDB.UserCollection.Find(x => x.Id == blog.UserId && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
       BlogResponse blogResponse = new BlogResponse(blog, user);
       blogResponses.Add(blogResponse);
     }
@@ -45,15 +46,12 @@ public class BlogController : ControllerBase
 
   public async Task<IActionResult> GetBlog(string id) // Individual blog page with its comments.
   {
-    Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+    Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id && !x.Hide && !x.Deleted).FirstOrDefaultAsync();
 
     if (blog == null)
-      return NotFound(new ErrorMessage("Blog is not found"));
+      return NotFound("Blog is not found");
 
-    User? author = await _mongoDB.UserCollection.Find(x => x.Id == blog.UserId).FirstOrDefaultAsync();
-
-    if (author == null)
-      return NotFound(new ErrorMessage("Author is not found"));
+    User? author = await _mongoDB.UserCollection.Find(x => x.Id == blog.UserId && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
 
     BlogResponse blogResponse = new BlogResponse(blog, author);
 
@@ -61,7 +59,6 @@ public class BlogController : ControllerBase
 
   }
 
-  [Authorize(Roles = "admin")]
   [HttpPost]
   [Route("create")]
   public async Task<IActionResult> CreateBlog([FromBody] CreateBlogRequest body)
@@ -69,9 +66,12 @@ public class BlogController : ControllerBase
     string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
-      return Unauthorized(new ErrorMessage("You are not authorized user."));
+      return Unauthorized("You are not authorized user.");
 
-    User user = await _mongoDB.UserCollection.Find(x => x.Username == username).FirstAsync();
+    User? user = await _mongoDB.UserCollection.Find(x => x.Username == username && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
+
+    if (user == null)
+      return NotFound("User is not found.");
 
     Blog newBlog = new Blog { Topic = body.Topic, Category = body.Category, Detail = body.Content, UserId = user.Id };
 
@@ -81,17 +81,18 @@ public class BlogController : ControllerBase
 
   }
 
-  [Authorize(Roles = "admin")]
   [HttpPatch]
   [Route("update/{id:length(24)}")]
   public async Task<IActionResult> UpdateBlog(string id, [FromBody] EditContentRequest body)
   {
-    Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+    Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id && !x.Hide && !x.Deleted).FirstOrDefaultAsync();
 
     if (blog == null)
       return NotFound("Blog is not found.");
 
-    blog.Detail = body.Content;
+    blog.Topic = body.Topic ?? blog.Topic;
+    blog.Detail = body.Content ?? blog.Detail;
+    blog.Hide = body.Hide ?? blog.Hide;
     blog.UpdatedDate = DateTime.Now;
 
     await _mongoDB.BlogCollection.ReplaceOneAsync(x => x.Id == id, blog);
@@ -99,20 +100,24 @@ public class BlogController : ControllerBase
     return Ok(blog);
   }
 
-  [Authorize]
   [HttpPatch]
   [Route("like/{id:length(24)}")]
   public async Task<IActionResult> LikeBlog(string id)
   {
-    Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
-
-    if (blog == null)
-      return NotFound(new ErrorMessage("Blog is not found."));
-
     string? username = Request.HttpContext.User.FindFirstValue("username");
 
     if (String.IsNullOrEmpty(username))
-      return Unauthorized(new ErrorMessage("You are not authorized user."));
+      return Unauthorized("You are not authorized user.");
+
+    User? user = await _mongoDB.UserCollection.Find(x => x.Username == username && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
+
+    if (user == null)
+      return NotFound("User is not found.");
+
+    Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id && !x.Hide && !x.Deleted).FirstOrDefaultAsync();
+
+    if (blog == null)
+      return NotFound("Blog is not found.");
 
     if (blog.Like.Contains(username))
       blog.Like.Remove(username);
@@ -125,27 +130,64 @@ public class BlogController : ControllerBase
 
   }
 
-  [Authorize(Roles = "admin")]
-  [HttpDelete]
-  [Route("delete/{id:length(24)}")]
-  public async Task<IActionResult> DeleteBlog(string id)
+  [HttpPatch]
+  [Route("hide/{id:length(24)}")]
+  public async Task<IActionResult> HideBlog(string id)
   {
-    Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+    string? username = Request.HttpContext.User.FindFirstValue("username");
 
-    if (blog is null)
-      return NotFound(new ErrorMessage("Blog is not Found."));
+    if (String.IsNullOrEmpty(username))
+      return Unauthorized("You are not authorized user.");
 
-    await _mongoDB.BlogCollection.DeleteOneAsync(x => x.Id == id);
+    User? user = await _mongoDB.UserCollection.Find(x => x.Username == username && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
 
-    return NoContent();
+    if (user == null)
+      return NotFound("User is not found.");
+
+    Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id && !x.Deleted).FirstOrDefaultAsync();
+
+    if (blog == null)
+      return NotFound("Blog is not found.");
+
+    if (blog.UserId != user.Id)
+      return Unauthorized("You are not the author of this blog.");
+
+    blog.Hide = !blog.Hide;
+
+    await _mongoDB.BlogCollection.ReplaceOneAsync(x => x.Id == id, blog);
+
+    return Ok(blog);
+
   }
 
-  [AllowAnonymous]
-  [HttpPost]
-  [Route("magicadd")]
-  public async Task<IActionResult> MagicAdd([FromBody] Blog newBlog)
+  [HttpDelete]
+  [Route("delete/{id:length(24)}")]
+  gi public async Task<IActionResult> DeleteBlog(string id)
   {
-    await _mongoDB.BlogCollection.InsertOneAsync(newBlog);
-    return Ok(newBlog);
+    string? username = Request.HttpContext.User.FindFirstValue("username");
+
+    if (String.IsNullOrEmpty(username))
+      return Unauthorized("You are not authorized user.");
+
+    User? user = await _mongoDB.UserCollection.Find(x => x.Username == username && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
+
+    if (user == null)
+      return NotFound("User is not found.");
+
+    Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id && !x.Deleted).FirstOrDefaultAsync();
+
+    if (blog == null)
+      return NotFound("Blog is not found.");
+
+    if (blog.UserId != user.Id)
+      return Unauthorized("You are not the author of this blog.");
+
+    blog.Hide = true;
+    blog.Deleted = true;
+
+    await _mongoDB.BlogCollection.ReplaceOneAsync(x => x.Id == id, blog);
+
+    return NoContent();
+
   }
 }
