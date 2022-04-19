@@ -61,7 +61,7 @@ public class AdminController : ControllerBase
 
     user.ProfileImage = body.ProfileImage ?? user.ProfileImage;
 
-    user.UpdatedDate = DateTime.Now;
+    user.UpdatedDate = DateTime.UtcNow;
 
     await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Id == id, user);
 
@@ -133,7 +133,7 @@ public class AdminController : ControllerBase
     blog.Detail = body.Content ?? blog.Detail;
     blog.Hide = body.Hide ?? blog.Hide;
     blog.Deleted = body.Delete ?? blog.Deleted;
-    blog.UpdatedDate = DateTime.Now;
+    blog.UpdatedDate = DateTime.UtcNow;
 
     await _mongoDB.BlogCollection.ReplaceOneAsync(x => x.Id == id, blog);
 

@@ -74,7 +74,7 @@ public class UserController : ControllerBase
 
     user.Name = body.Name ?? user.Name;
     user.ProfileImage = body.ProfileImage ?? user.ProfileImage;
-    user.UpdatedDate = DateTime.Now;
+    user.UpdatedDate = DateTime.UtcNow;
 
     await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Id == id, user);
 

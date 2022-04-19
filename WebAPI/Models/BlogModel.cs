@@ -36,8 +36,8 @@ public class Blog
   public bool Deleted { get; set; } = false;
 
   [BsonElement("created_date")]
-  public DateTime CreatedDate { get; set; } = DateTime.Now;
+  public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
   [BsonElement("updated_date")]
-  public DateTime UpdatedDate { get; set; } = DateTime.Now;
+  public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
 }

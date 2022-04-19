@@ -47,7 +47,7 @@ public class RevokeToken
     context.Response.Cookies.Append(Constant.Name.AccessToken, newAccessToken, new CookieOptions
     {
       HttpOnly = false,
-      Expires = DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec)
+      Expires = DateTime.UtcNow.AddDays(Constant.Number.AccessTokenExpiresInDay)
     });
 
     await _next(context);

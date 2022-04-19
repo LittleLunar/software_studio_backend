@@ -20,6 +20,7 @@ public class TokenUtils
     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.staticConfig["Jwt:SecretKey"])),
     ClockSkew = TimeSpan.Zero
   };
+
   public static JwtSecurityTokenHandler tokenHandler { get; } = new JwtSecurityTokenHandler();
   public static string GenerateAccessToken(User user)
   {
@@ -27,11 +28,11 @@ public class TokenUtils
       new Claim("username", user.Username),
       new Claim(ClaimTypes.Role, user.Role),
       new Claim("display_name", user.Name),
-      new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString()),
-      new Claim(JwtRegisteredClaimNames.Exp, DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec).ToString())
+      new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+      new Claim(JwtRegisteredClaimNames.Exp, DateTime.UtcNow.AddDays(Constant.Number.AccessTokenExpiresInDay).ToString())
     };
 
-    return GenerateToken(DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec), claims);
+    return GenerateToken(DateTime.UtcNow.AddDays(Constant.Number.AccessTokenExpiresInDay), claims);
 
   }
 
@@ -40,7 +41,7 @@ public class TokenUtils
     Claim[] claims = new Claim[] {
       new Claim("username", user.Username)
     };
-    return GenerateToken(DateTime.Now.AddMonths(Constant.Number.RefreshTokenExpiresInMonths), claims);
+    return GenerateToken(DateTime.UtcNow.AddMonths(Constant.Number.RefreshTokenExpiresInMonths), claims);
   }
 
   private static string GenerateToken(DateTime expires, Claim[]? claims = null)

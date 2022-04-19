@@ -11,6 +11,8 @@ public static class Constant
   public static class Number
   {
     public const double AccessTokenExpiresInSec = 15; // InSec type => double
+
+    public const double AccessTokenExpiresInDay = 1;
     public const int RefreshTokenExpiresInMonths = 1; // InMonth type => int
   }
 

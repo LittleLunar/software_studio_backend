@@ -42,13 +42,13 @@ public class SessionController : ControllerBase
     Response.Cookies.Append(Constant.Name.AccessToken, accessToken, new CookieOptions
     {
       HttpOnly = false,
-      Expires = DateTime.Now.AddSeconds(Constant.Number.AccessTokenExpiresInSec)
+      Expires = DateTime.UtcNow.AddDays(Constant.Number.AccessTokenExpiresInDay)
     });
 
     Response.Cookies.Append(Constant.Name.RefreshToken, refreshToken, new CookieOptions
     {
       HttpOnly = true,
-      Expires = DateTime.Now.AddMonths(Constant.Number.RefreshTokenExpiresInMonths)
+      Expires = DateTime.UtcNow.AddMonths(Constant.Number.RefreshTokenExpiresInMonths)
     });
 
     return Ok(new { accessToken = accessToken, refreshToken = refreshToken });

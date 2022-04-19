@@ -93,7 +93,7 @@ public class BlogController : ControllerBase
     blog.Topic = body.Topic ?? blog.Topic;
     blog.Detail = body.Content ?? blog.Detail;
     blog.Hide = body.Hide ?? blog.Hide;
-    blog.UpdatedDate = DateTime.Now;
+    blog.UpdatedDate = DateTime.UtcNow;
 
     await _mongoDB.BlogCollection.ReplaceOneAsync(x => x.Id == id, blog);
 

@@ -65,7 +65,7 @@ public class CommentController : ControllerBase
       return Unauthorized("You are not the author of this comment.");
 
     comment.Detail = body.Content ?? comment.Detail;
-    comment.UpdatedDate = DateTime.Now;
+    comment.UpdatedDate = DateTime.UtcNow;
 
     await _mongoDB.CommentCollection.ReplaceOneAsync(x => x.Id == id, comment);
 
