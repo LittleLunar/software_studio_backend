@@ -55,7 +55,7 @@ public class BlogController : ControllerBase
 
     BlogResponse blogResponse = new BlogResponse(blog, author);
 
-    return Ok(blog);
+    return Ok(blogResponse);
 
   }
 
