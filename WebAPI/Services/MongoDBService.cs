@@ -12,6 +12,8 @@ public class MongoDBService
   public IMongoCollection<Blog> BlogCollection { get; private set; }
 
   public IMongoCollection<Comment> CommentCollection { get; private set; }
+
+  public IMongoCollection<Announcement> AnnounceCollection { get; private set; }
   public MongoDBService(
     IOptions<DatabaseSettings> databaseSettings
   )
@@ -34,6 +36,9 @@ public class MongoDBService
       databaseSettings.Value.BlogsCollectionName
     );
 
+    AnnounceCollection = mongoDatabase.GetCollection<Announcement>(
+      databaseSettings.Value.AnnouncesCollectionName
+    );
 
     CommentCollection = mongoDatabase.GetCollection<Comment>(
       databaseSettings.Value.CommentsCollectionName

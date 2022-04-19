@@ -8,7 +8,7 @@ public class CommentResponse
   public string CommentId { get; set; } = null!;
 
   [JsonPropertyName("author")]
-  public UserResponse Author { get; set; } = null!;
+  public UserResponse? Author { get; set; }
 
   [JsonPropertyName("comment")]
   public string Comment { get; set; } = null!;
@@ -24,10 +24,11 @@ public class CommentResponse
 
   [JsonPropertyName("updated_date")]
   public DateTime UpdatedDate { get; set; }
-  public CommentResponse(Comment comment, User user)
+  public CommentResponse(Comment comment, User? user)
   {
     this.CommentId = comment.Id;
-    this.Author = new UserResponse(user);
+    if (user != null)
+      this.Author = new UserResponse(user);
     this.Comment = comment.Detail;
     this.Like = comment.Like.Count;
     this.LikeUser = comment.Like;

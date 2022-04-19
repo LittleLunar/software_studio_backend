@@ -31,7 +31,7 @@ public class BlogController : ControllerBase
     foreach (Blog blog in blogs)
     {
       User? user = await _mongoDB.UserCollection.Find(x => x.Id == blog.UserId && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
-      BlogResponse blogResponse = new BlogResponse(blog, user);
+      BlogResponse blogResponse = new BlogResponse(blog, user, null);
       blogResponses.Add(blogResponse);
     }
 
@@ -43,7 +43,6 @@ public class BlogController : ControllerBase
   [AllowAnonymous]
   [HttpGet]
   [Route("{id:length(24)}")]
-
   public async Task<IActionResult> GetBlog(string id) // Individual blog page with its comments.
   {
     Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id && !x.Hide && !x.Deleted).FirstOrDefaultAsync();
@@ -53,7 +52,18 @@ public class BlogController : ControllerBase
 
     User? author = await _mongoDB.UserCollection.Find(x => x.Id == blog.UserId && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
 
-    BlogResponse blogResponse = new BlogResponse(blog, author);
+    List<Comment> comments = await _mongoDB.CommentCollection.Find(x => x.ContentId == blog.Id).ToListAsync();
+
+    List<CommentResponse> commentResponses = new List<CommentResponse>();
+
+    foreach (Comment comment in comments)
+    {
+      User? user = await _mongoDB.UserCollection.Find(x => x.Id == comment.UserId && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
+      CommentResponse commentResponse = new CommentResponse(comment, user);
+      commentResponses.Add(commentResponse);
+    }
+
+    BlogResponse blogResponse = new BlogResponse(blog, author, commentResponses);
 
     return Ok(blogResponse);
 

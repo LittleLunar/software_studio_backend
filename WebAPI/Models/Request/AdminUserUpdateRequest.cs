@@ -10,7 +10,7 @@ public class AdminUserUpdateRequest
   [JsonPropertyName("password")]
   public string? Password { get; set; }
 
-  [JsonPropertyName("display_name")]
+  [JsonPropertyName("name")]
   public string? Name { get; set; }
 
   [JsonPropertyName("role")]

@@ -3,13 +3,13 @@ using System.Text.Json.Serialization;
 
 namespace software_studio_backend.Models;
 
-public class BlogResponse
+public class AdminBlogResponse
 {
   [JsonPropertyName("blog_id")]
   public string BlogId { get; set; } = null!;
 
-  [JsonPropertyName("author")]
-  public UserResponse? Author { get; set; }
+  [JsonPropertyName("author_id")]
+  public string AuthorId { get; set; }
 
   [JsonPropertyName("topic")]
   public string Topic { get; set; } = null!;
@@ -26,9 +26,6 @@ public class BlogResponse
   [JsonPropertyName("like_users")]
   public List<string> LikeUsers { get; set; } = null!;
 
-  [JsonPropertyName("comments")]
-  public List<CommentResponse> Comments { get; set; } = new List<CommentResponse>();
-
   [JsonPropertyName("hide")]
   public bool Hide { get; set; }
 
@@ -41,18 +38,15 @@ public class BlogResponse
   [JsonPropertyName("updated_date")]
   public DateTime UpdatedDate { get; set; }
 
-  public BlogResponse(Blog blog, User? user, List<CommentResponse>? comments)
+  public AdminBlogResponse(Blog blog)
   {
     this.BlogId = blog.Id;
-    if (user != null)
-      this.Author = new UserResponse(user);
+    this.AuthorId = blog.UserId;
     this.Topic = blog.Topic;
     this.Content = blog.Detail;
     this.Category = blog.Category;
     this.Like = blog.Like.Count;
     this.LikeUsers = blog.Like;
-    if (comments != null)
-      this.Comments = comments;
     this.Hide = blog.Hide;
     this.Deleted = blog.Deleted;
     this.CreatedDate = blog.CreatedDate;

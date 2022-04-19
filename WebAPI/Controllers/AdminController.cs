@@ -106,16 +106,16 @@ public class AdminController : ControllerBase
   {
     List<Blog> blogs = await _mongoDB.BlogCollection.Find(_ => true).ToListAsync();
 
-    List<BlogResponse> blogResponses = new List<BlogResponse>();
+    List<AdminBlogResponse> blogResponses = new List<AdminBlogResponse>();
 
     foreach (Blog blog in blogs)
     {
       User user = await _mongoDB.UserCollection.Find(x => x.Id == blog.UserId).FirstAsync();
-      BlogResponse blogResponse = new BlogResponse(blog, user);
+      AdminBlogResponse blogResponse = new AdminBlogResponse(blog);
       blogResponses.Add(blogResponse);
     }
 
-    BlogListResponse blogList = new BlogListResponse { Blogs = blogResponses.OrderByDescending(x => x.CreatedDate).ToList() };
+    AdminBlogListResponse blogList = new AdminBlogListResponse { Blogs = blogResponses.OrderByDescending(x => x.CreatedDate).ToList() };
 
     return Ok(blogList);
   }
@@ -208,6 +208,26 @@ public class AdminController : ControllerBase
     return Ok(comment);
   }
 
+  [HttpPost]
+  [Route("manage/announce/create")]
+  public async Task<IActionResult> CreateAnnounce([FromBody] CreateAnnounceRequest body)
+  {
+    await _mongoDB.AnnounceCollection.DeleteManyAsync(_ => true);
+
+    Announcement announce = new Announcement { Content = body.Content };
+
+    await _mongoDB.AnnounceCollection.InsertOneAsync(announce);
+
+    return Ok(announce);
+  }
+
+  [HttpDelete]
+  [Route("manage/announce/delete")]
+  public async Task<IActionResult> DeleteAnnounce()
+  {
+    await _mongoDB.AnnounceCollection.DeleteManyAsync(_ => true);
+    return NoContent();
+  }
 
 
   [AllowAnonymous]

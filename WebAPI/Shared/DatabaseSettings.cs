@@ -9,6 +9,7 @@ public class DatabaseSettings
   public string? UsersCollectionName { get; set; }
 
   public string? BlogsCollectionName { get; set; }
-
+  
+  public string? AnnouncesCollectionName { get; set; }
   public string? CommentsCollectionName { get; set; }
 }
