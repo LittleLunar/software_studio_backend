@@ -63,7 +63,7 @@ public class UserController : ControllerBase
 
   [HttpPatch]
   [Route("update")]
-  public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserRequest body)
+  public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequest body)
   {
     string username = Request.HttpContext.User.FindFirstValue("username");
 
@@ -76,7 +76,7 @@ public class UserController : ControllerBase
     user.ProfileImage = body.ProfileImage ?? user.ProfileImage;
     user.UpdatedDate = DateTime.UtcNow;
 
-    await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Id == id, user);
+    await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Id == user.Id, user);
 
     return NoContent();
 

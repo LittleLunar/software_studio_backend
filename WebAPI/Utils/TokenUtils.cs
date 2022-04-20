@@ -25,6 +25,7 @@ public class TokenUtils
   public static string GenerateAccessToken(User user)
   {
     Claim[] claims = new Claim[] {
+      new Claim("id", user.Id),
       new Claim("username", user.Username),
       new Claim(ClaimTypes.Role, user.Role),
       new Claim("display_name", user.Name),
