@@ -165,6 +165,7 @@ public class AdminController : ControllerBase
     if (blog == null)
       return NotFound("Blog is not found.");
 
+    blog.Hide = !blog.Deleted;
     blog.Deleted = !blog.Deleted;
 
     await _mongoDB.BlogCollection.ReplaceOneAsync(x => x.Id == id, blog);

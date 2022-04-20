@@ -52,7 +52,7 @@ public class BlogController : ControllerBase
 
     User? author = await _mongoDB.UserCollection.Find(x => x.Id == blog.UserId && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
 
-    List<Comment> comments = await _mongoDB.CommentCollection.Find(x => x.ContentId == blog.Id).ToListAsync();
+    List<Comment> comments = await _mongoDB.CommentCollection.Find(x => x.ContentId == blog.Id && !x.Delete).ToListAsync();
 
     List<CommentResponse> commentResponses = new List<CommentResponse>();
 
