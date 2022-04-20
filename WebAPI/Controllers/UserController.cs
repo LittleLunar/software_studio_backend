@@ -78,7 +78,7 @@ public class UserController : ControllerBase
 
     await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Id == user.Id, user);
 
-    return NoContent();
+    return Ok(user);
 
   }
 
