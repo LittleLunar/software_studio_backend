@@ -11,6 +11,9 @@ public class EditContentRequest
   [JsonPropertyName("content")]
   public string? Content { get; set; }
 
+  [JsonPropertyName("category")]
+  public List<string>? Category { get; set; }
+
   [JsonPropertyName("hide")]
   public bool? Hide { get; set; }
 }

@@ -102,6 +102,7 @@ public class BlogController : ControllerBase
 
     blog.Topic = body.Topic ?? blog.Topic;
     blog.Detail = body.Content ?? blog.Detail;
+    blog.Category = body.Category ?? blog.Category;
     blog.Hide = body.Hide ?? blog.Hide;
     blog.UpdatedDate = DateTime.UtcNow;
 
