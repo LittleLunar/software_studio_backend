@@ -45,10 +45,6 @@ public class User
   [JsonPropertyName("updated_date")]
   public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
 
-  public User()
-  {
-    this.Name = this.Username;
-  }
   public override string ToString()
   {
     return Username;

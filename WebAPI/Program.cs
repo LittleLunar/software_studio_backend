@@ -44,11 +44,12 @@ builder.Services.AddCors(option =>
   option.AddPolicy(name: builder.Configuration["Cors:PolicyName"],
   policy =>
   {
-    policy.WithOrigins("http://localhost:5500", "http://localhost:3000")
+    policy.WithOrigins("http://localhost:5500", "http://localhost:3000", "https://backoffice-thammathip.exitguy.studio", "https://app-thammathip.exitguy.studio")
       .SetIsOriginAllowed(origin => true)
       .AllowAnyHeader()
       .AllowAnyMethod()
       .AllowCredentials();
+
   });
 });
 // builder.Services.AddCors();
