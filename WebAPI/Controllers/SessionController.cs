@@ -71,7 +71,7 @@ public class SessionController : ControllerBase
 
     string encryptedPass = PasswordEncryption.Encrypt(body.Password);
 
-    User newUser = new User { Username = body.Username, Password = encryptedPass, Name = body.Username };
+    User newUser = new User { Username = body.Username, Password = encryptedPass, Name = body.Name };
 
     await _mongoDB.UserCollection.InsertOneAsync(newUser);
 
