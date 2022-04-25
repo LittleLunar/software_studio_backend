@@ -51,7 +51,8 @@ public class AdminController : ControllerBase
 
     user.Username = body.Username ?? user.Username;
 
-    user.Password = body.Password ?? user.Password;
+    if (body.Password != null)
+      user.Password = PasswordEncryption.Encrypt(body.Password);
 
     user.Role = body.Role ?? user.Role;
 
