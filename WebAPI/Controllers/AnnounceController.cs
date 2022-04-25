@@ -11,9 +11,12 @@ namespace software_studio_backend.Controllers;
 public class AnnounceController : ControllerBase
 {
   private readonly MongoDBService _mongoDB;
+  private readonly ILogger<AnnounceController> _logger;
 
-  public AnnounceController(MongoDBService mongoDBService)
+
+  public AnnounceController(ILogger<AnnounceController> logger,MongoDBService mongoDBService)
   {
+    _logger = logger;
     _mongoDB = mongoDBService;
   }
 

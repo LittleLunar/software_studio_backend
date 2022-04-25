@@ -13,9 +13,11 @@ namespace software_studio_backend.Controllers;
 public class BlogController : ControllerBase
 {
   private readonly MongoDBService _mongoDB;
+  private readonly ILogger<BlogController> _logger;
 
-  public BlogController(MongoDBService mongoDBService)
+  public BlogController(ILogger<BlogController> logger, MongoDBService mongoDBService)
   {
+    _logger = logger;
     _mongoDB = mongoDBService;
   }
 

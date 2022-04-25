@@ -8,6 +8,12 @@ using software_studio_backend.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Host.ConfigureLogging(logging =>
+{
+  logging.ClearProviders();
+  logging.AddConsole();
+});
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.Configure<DatabaseSettings>(

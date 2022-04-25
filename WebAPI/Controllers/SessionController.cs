@@ -13,9 +13,11 @@ namespace software_studio_backend.Controllers;
 public class SessionController : ControllerBase
 {
   private readonly MongoDBService _mongoDB;
+  private readonly ILogger<SessionController> _logger;
 
-  public SessionController(MongoDBService mongoDBService)
+  public SessionController(ILogger<SessionController> logger, MongoDBService mongoDBService)
   {
+    _logger = logger;
     _mongoDB = mongoDBService;
   }
 
@@ -24,7 +26,6 @@ public class SessionController : ControllerBase
   [Route("login")]
   public async Task<IActionResult> Login([FromBody] AuthenRequest body)
   {
-    Console.WriteLine("Someone is logging in.");
 
     User? user = await _mongoDB.UserCollection.Find(x => x.Username == body.username && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
 

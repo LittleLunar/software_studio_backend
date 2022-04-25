@@ -15,9 +15,11 @@ namespace software_studio_backend.Controllers;
 public class CommentController : ControllerBase
 {
   private readonly MongoDBService _mongoDB;
+  private readonly ILogger<CommentController> _logger;
 
-  public CommentController(MongoDBService mongoDBService)
+  public CommentController(ILogger<CommentController> logger, MongoDBService mongoDBService)
   {
+    _logger = logger;
     _mongoDB = mongoDBService;
   }
 

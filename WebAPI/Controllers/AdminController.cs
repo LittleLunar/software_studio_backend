@@ -12,8 +12,10 @@ namespace software_studio_backend.Controllers;
 public class AdminController : ControllerBase
 {
   private readonly MongoDBService _mongoDB;
-  public AdminController(MongoDBService mongoDBService)
+  private readonly ILogger<AdminController> _logger;
+  public AdminController(ILogger<AdminController> logger, MongoDBService mongoDBService)
   {
+    _logger = logger;
     _mongoDB = mongoDBService;
   }
 
@@ -93,6 +95,7 @@ public class AdminController : ControllerBase
     if (user == null)
       return NotFound("User is not found.");
 
+    user.Banned = !user.Deleted;
     user.Deleted = !user.Deleted;
 
     await _mongoDB.UserCollection.ReplaceOneAsync(x => x.Id == id, user);
