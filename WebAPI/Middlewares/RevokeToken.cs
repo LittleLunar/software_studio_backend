@@ -72,4 +72,5 @@ public static class RevokeTokenExtensions
   {
     return app.UseMiddleware<RevokeToken>();
   }
+
 }

@@ -55,7 +55,6 @@ builder.Services.AddCors(option =>
       .AllowAnyHeader()
       .AllowAnyMethod()
       .AllowCredentials();
-
   });
 });
 // builder.Services.AddCors();
@@ -77,7 +76,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 
 app.UseRouting();
 

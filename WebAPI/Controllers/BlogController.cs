@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace software_studio_backend.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/[controller]")] // root/api/Blog
 [Authorize]
 public class BlogController : ControllerBase
 {
@@ -51,7 +51,7 @@ public class BlogController : ControllerBase
 
   [AllowAnonymous]
   [HttpGet]
-  [Route("{id:length(24)}")]
+  [Route("{id:length(24)}")] // root/api/Blog/idffewfewfewfewfefewfefew
   public async Task<IActionResult> GetBlog(string id) // Individual blog page with its comments.
   {
     Blog? blog = await _mongoDB.BlogCollection.Find(x => x.Id == id && !x.Hide && !x.Deleted).FirstOrDefaultAsync();

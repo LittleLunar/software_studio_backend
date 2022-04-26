@@ -197,7 +197,7 @@ public class AdminController : ControllerBase
     return Ok(adminCommentList);
   }
 
-  [HttpGet]
+  [HttpPatch]
   [Route("manage/comment/delete/{id:length(24)}")]
   public async Task<IActionResult> UpdateComment(string id)
   {
