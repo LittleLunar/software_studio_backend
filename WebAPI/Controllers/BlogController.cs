@@ -33,7 +33,14 @@ public class BlogController : ControllerBase
     foreach (Blog blog in blogs)
     {
       User? user = await _mongoDB.UserCollection.Find(x => x.Id == blog.UserId && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
-      BlogResponse blogResponse = new BlogResponse(blog, user, null);
+      List<LikeUserResponse> blogLikeUserResponses = new List<LikeUserResponse>();
+      foreach (String likeUsername in blog.Like)
+      {
+        User likeUser = await _mongoDB.UserCollection.Find(x => x.Username == likeUsername).FirstAsync();
+        LikeUserResponse newLikeUserResponse = new LikeUserResponse { Username = likeUsername, Name = likeUser.Name };
+        blogLikeUserResponses.Add(newLikeUserResponse);
+      }
+      BlogResponse blogResponse = new BlogResponse(blog, user, blogLikeUserResponses, null);
       blogResponses.Add(blogResponse);
     }
 
@@ -61,11 +68,27 @@ public class BlogController : ControllerBase
     foreach (Comment comment in comments)
     {
       User? user = await _mongoDB.UserCollection.Find(x => x.Id == comment.UserId && !x.Banned && !x.Deleted).FirstOrDefaultAsync();
-      CommentResponse commentResponse = new CommentResponse(comment, user);
+      List<LikeUserResponse> commentLikeUserResponses = new List<LikeUserResponse>();
+      foreach (String likeUsername in comment.Like)
+      {
+        User likeUser = await _mongoDB.UserCollection.Find(x => x.Username == likeUsername).FirstAsync();
+        LikeUserResponse newLikeUserResponse = new LikeUserResponse { Username = likeUsername, Name = likeUser.Name };
+        commentLikeUserResponses.Add(newLikeUserResponse);
+      }
+      CommentResponse commentResponse = new CommentResponse(comment, user, commentLikeUserResponses);
       commentResponses.Add(commentResponse);
     }
 
-    BlogResponse blogResponse = new BlogResponse(blog, author, commentResponses);
+
+    List<LikeUserResponse> blogLikeUserResponses = new List<LikeUserResponse>();
+    foreach (String likeUsername in blog.Like)
+    {
+      User likeUser = await _mongoDB.UserCollection.Find(x => x.Username == likeUsername).FirstAsync();
+      LikeUserResponse newLikeUserResponse = new LikeUserResponse { Username = likeUsername, Name = likeUser.Name };
+      blogLikeUserResponses.Add(newLikeUserResponse);
+    }
+
+    BlogResponse blogResponse = new BlogResponse(blog, author, blogLikeUserResponses, commentResponses);
 
     return Ok(blogResponse);
 

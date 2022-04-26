@@ -24,7 +24,7 @@ public class BlogResponse
   public int Like { get; set; }
 
   [JsonPropertyName("like_users")]
-  public List<string> LikeUsers { get; set; } = null!;
+  public List<LikeUserResponse> LikeUsers { get; set; } = new List<LikeUserResponse>();
 
   [JsonPropertyName("comments")]
   public List<CommentResponse> Comments { get; set; } = new List<CommentResponse>();
@@ -41,7 +41,7 @@ public class BlogResponse
   [JsonPropertyName("updated_date")]
   public DateTime UpdatedDate { get; set; }
 
-  public BlogResponse(Blog blog, User? user, List<CommentResponse>? comments)
+  public BlogResponse(Blog blog, User? user, List<LikeUserResponse>? likeUserResponses, List<CommentResponse>? comments)
   {
     this.BlogId = blog.Id;
     if (user != null)
@@ -50,7 +50,8 @@ public class BlogResponse
     this.Content = blog.Detail;
     this.Category = blog.Category;
     this.Like = blog.Like.Count;
-    this.LikeUsers = blog.Like;
+    if (likeUserResponses != null)
+      this.LikeUsers = likeUserResponses;
     if (comments != null)
       this.Comments = comments;
     this.Hide = blog.Hide;

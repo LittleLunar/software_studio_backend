@@ -248,6 +248,7 @@ public class AdminController : ControllerBase
       new User { Username = "admin3", Password = PasswordEncryption.Encrypt("admin123"), Name = "Admin Thanadol", Role = "admin" },
       new User { Username = "admin4", Password = PasswordEncryption.Encrypt("admin123"), Name = "Admin Thanakorn", Role = "admin" },
       new User { Username = "admin5", Password = PasswordEncryption.Encrypt("admin123"), Name = "Admin Rinraphat", Role = "admin" },
+      new User { Username = "alfred", Password = PasswordEncryption.Encrypt("user123"), Name = "Alfred" },
       new User { Username = "aiden", Password = PasswordEncryption.Encrypt("user123"), Name = "Aiden" },
       new User { Username = "tanya", Password = PasswordEncryption.Encrypt("user123"), Name = "Tanya" },
       new User { Username = "marvin", Password = PasswordEncryption.Encrypt("user123"), Name = "Marvin" , Banned = true},
